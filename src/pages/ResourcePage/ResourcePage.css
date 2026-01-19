@@ -1,0 +1,33 @@
+.page--resource {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.resource-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.resource-info h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.resource-desc {
+  margin: 0 0 0.5rem 0;
+  color: #475569;
+}
+
+.resource-meta {
+  margin: 0 0 1rem 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.resource-actions {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+}

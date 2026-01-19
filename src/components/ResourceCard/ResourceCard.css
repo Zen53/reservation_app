@@ -1,0 +1,73 @@
+.resource-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.resource-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.resource-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+.resource-card__capacity {
+  font-size: 0.85rem;
+  color: #64748b;
+  white-space: nowrap;
+  background: #f1f5f9;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.resource-card__description {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.resource-card__equipment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.resource-card__tag {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.resource-card__link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  transition: color 0.2s;
+}
+
+.resource-card__link:hover {
+  color: #1d4ed8;
+}
