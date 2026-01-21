@@ -22,18 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Python
-venv/
-backend/venv/
-__pycache__/
-*.pyc
-
-# Node
-node_modules/
-
-# Vite
-dist/
-
-# OS
-.DS_Store
