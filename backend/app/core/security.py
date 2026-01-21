@@ -1,10 +1,13 @@
-def create_fake_token(user_id: str, role: str) -> str:
-    # MOCK TOKEN
-    return f"fake-token-{user_id}-{role}"
+from datetime import datetime, timedelta
+from jose import jwt
 
-def decode_fake_token(token: str):
-    try:
-        _, _, user_id, role = token.split("-")
-        return {"user_id": user_id, "role": role}
-    except Exception:
-        return None
+SECRET_KEY = "super-secret-key"
+ALGORITHM = "HS256"
+TOKEN_EXPIRE_MINUTES = 60
+
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
