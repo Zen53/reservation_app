@@ -1,0 +1,27 @@
+.layout-header {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.layout-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Bouton Déconnexion */
+
+.logout-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #f2f2f2;
+}
