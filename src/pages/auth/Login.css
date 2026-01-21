@@ -1,6 +1,10 @@
 .login-page {
   max-width: 420px;
   margin: 4rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   text-align: center;
 }
 
@@ -10,51 +14,77 @@
 }
 
 .login-subtitle {
-  color: #555;
+  color: #666;
   margin-bottom: 2rem;
 }
 
-.login-actions {
+.login-switch {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-switch button {
+  padding: 0.5rem 1.2rem;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+}
+
+.login-switch button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.login-switch button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.login-switch button.active {
+  background: #e8f0ff;
+  border-color: #c6d9ff;
+  font-weight: 600;
+}
+
+.login-form {
+  text-align: left;
+}
+
+.form-group {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-/* Boutons */
+.form-group label {
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  color: #444;
+}
 
-.login-button {
-  padding: 0.7rem 1rem;
+.form-group input {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.login-submit {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.7rem;
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: none;
+  background-color: #1a3d8f;
+  color: #fff;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.login-button:active {
-  transform: scale(0.98);
+.login-submit:hover {
+  background-color: #16337a;
 }
 
-/* Utilisateur */
-
-.login-button.user {
-  background-color: #e8f0ff;
-  border-color: #c6d9ff;
-  color: #1a3d8f;
-}
-
-.login-button.user:hover {
-  background-color: #dbe7ff;
-}
-
-/* Admin */
-
-.login-button.admin {
-  background-color: #fff1f1;
-  border-color: #f5c2c2;
-  color: #8f1a1a;
-}
-
-.login-button.admin:hover {
-  background-color: #ffe3e3;
+.login-error {
+  margin-top: 1rem;
+  color: #b00020;
+  font-size: 0.9rem;
 }

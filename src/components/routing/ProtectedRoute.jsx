@@ -5,13 +5,15 @@ export default function ProtectedRoute({ children, role }) {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
-    return <p>Chargement...</p>;
+    return null; 
   }
 
+  // 401 - non authentifié
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // 403 - authentifié mais non autorisé
   if (role && user.role !== role) {
     return <Navigate to="/unauthorized" replace />;
   }

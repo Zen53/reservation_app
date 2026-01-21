@@ -1,5 +1,4 @@
-import { Routes, Route } from "react-router-dom";
-import { Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/routing/ProtectedRoute";
 
@@ -9,7 +8,7 @@ import NotFound from "./pages/auth/NotFound";
 
 import HomePage from "./pages/HomePage";
 import ResourcePage from "./pages/ResourcePage";
-import ReservationPage from "./pages/ReservationPage";
+import AdminPage from "./pages/admin/AdminPage";
 
 export default function App() {
   return (
@@ -22,15 +21,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Ressources protégées */}
-        <Route
-          path="/resources"
-          element={
-            <ProtectedRoute>
-              <Navigate to="/" replace />
-                </ProtectedRoute>
-        }
-        />
+        {/* Ressource (détail uniquement) */}
         <Route
           path="/resources/:id"
           element={
@@ -40,27 +31,27 @@ export default function App() {
           }
         />
 
-        {/* Réservations (prévu / optionnel) */}
+        {/* Redirection /resources */}
         <Route
-          path="/reservations"
+          path="/resources"
           element={
             <ProtectedRoute>
-              <ReservationPage />
+              <Navigate to="/" replace />
             </ProtectedRoute>
           }
         />
 
-        {/* Admin */}
+        {/* Admin réel */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute role="admin">
-              <div>Dashboard Admin</div>
+              <AdminPage />
             </ProtectedRoute>
           }
         />
 
-        {/* Fallback */}
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

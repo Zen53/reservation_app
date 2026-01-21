@@ -1,25 +1,57 @@
-from fastapi import APIRouter, Depends
-from app.models.user import User
-from app.core.security import create_fake_token
-from app.auth.dependencies import get_current_user
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from app.core.security import create_access_token
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
+class UserLogin(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
 
-@router.post("/login")
-def login(role: str = "user"):
-    user = User(
-        id="mock-user-id",
-        email="user@test.com",
-        role=role
-    )
+class AdminLogin(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    admin_code: str
 
-    token = create_fake_token(user.id, user.role)
+
+@router.post("/login/user")
+def login_user(payload: UserLogin):
+    token = create_access_token({
+        "user_id": 1,
+        "role": "user",
+        "email": payload.email
+    })
 
     return {
         "access_token": token,
-        "user": user
+        "user": {
+            "id": 1,
+            "first_name": payload.first_name,
+            "last_name": payload.last_name,
+            "email": payload.email,
+            "role": "user"
+        }
     }
 
-@router.get("/me")
-def me(current_user = Depends(get_current_user)):
-    return current_user
+@router.post("/login/admin")
+def login_admin(payload: AdminLogin):
+    if payload.admin_code != "code123":
+        raise HTTPException(status_code=403, detail="Code admin invalide")
+
+    token = create_access_token({
+        "user_id": 99,
+        "role": "admin",
+        "email": payload.email
+    })
+
+    return {
+        "access_token": token,
+        "user": {
+            "id": 99,
+            "first_name": payload.first_name,
+            "last_name": payload.last_name,
+            "email": payload.email,
+            "role": "admin"
+        }
+    }

@@ -79,4 +79,15 @@ Ces messages sont utilisés uniquement lorsqu'ils sont explicitement renvoyés p
 - Ajouter storybook pour visualiser les composants isolés.
 
 ---
-Si vous voulez, j'ajoute un petit commit git et j'écrase `README.md` par cette version, ou j'ajoute des tests UI complémentaires.
+### Backend
+- Pour lancer backend(Git Bash / Windows):
+  Activer le venv: `source venv/Scripts/activate`
+  puis `uvicorn app.main:app --reload`
+### Authentification
+
+L’application utilise une authentification mock par token.
+Le backend (FastAPI) génère un token lors du login.
+Ce token est stocké côté frontend et utilisé pour protéger les routes.
+
+Les rôles utilisateur / admin permettent de restreindre l’accès à certaines pages
+(ex : espace administrateur).
