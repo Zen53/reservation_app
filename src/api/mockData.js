@@ -10,28 +10,32 @@ export const resources = [
     name: "Salle Einstein",
     description: "Grande salle de conférence - 20 personnes",
     capacity: 20,
-    equipment: ["Projecteur", "Tableau blanc", "Visioconférence"]
+    equipment: ["Projecteur", "Tableau blanc", "Visioconférence"],
+    active: true
   },
   {
     id: 2,
     name: "Salle Newton",
     description: "Salle de réunion moyenne - 10 personnes",
     capacity: 10,
-    equipment: ["Écran TV", "Tableau blanc"]
+    equipment: ["Écran TV", "Tableau blanc"],
+    active: true
   },
   {
     id: 3,
     name: "Salle Curie",
     description: "Petite salle de réunion - 6 personnes",
     capacity: 6,
-    equipment: ["Écran TV"]
+    equipment: ["Écran TV"],
+    active: true
   },
   {
     id: 4,
     name: "Salle Darwin",
     description: "Espace collaboratif - 15 personnes",
     capacity: 15,
-    equipment: ["Projecteur", "Paperboard", "Visioconférence"]
+    equipment: ["Projecteur", "Paperboard", "Visioconférence"],
+    active: true
   }
 ];
 

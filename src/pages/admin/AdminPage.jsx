@@ -1,5 +1,10 @@
+import "./AdminPage.css";
 import { useState, useEffect } from "react";
-import { getResources, getResourceReservations } from "../../api";
+import {
+  getResources,
+  getResourceReservations,
+  toggleResourceActive
+} from "../../api";
 
 export default function AdminPage() {
   const [resources, setResources] = useState([]);
@@ -44,6 +49,18 @@ export default function AdminPage() {
     loadAdminData();
   }, []);
 
+  const handleToggleActive = async (resourceId) => {
+    const response = await toggleResourceActive(resourceId);
+
+    if (response.status === 200) {
+      setResources((prev) =>
+        prev.map((r) =>
+          r.id === resourceId ? response.data : r
+        )
+      );
+    }
+  };
+
   if (loading) {
     return <p>Chargement du dashboard administrateur...</p>;
   }
@@ -65,7 +82,28 @@ export default function AdminPage() {
       </section>
 
       <section>
-        <h2>Réservations</h2>
+        <h2>Gestion des ressources</h2>
+
+        <ul>
+          {resources.map((resource) => (
+            <li key={resource.id}>
+              <span className="resource-label">
+                <strong>{resource.name}</strong> —{" "}
+                {resource.active ? "Active" : "Inactive"}
+              </span>
+              <button
+                className={resource.active ? "btn-desactivate" : "btn-activate"}
+                onClick={() => handleToggleActive(resource.id)}
+              >
+                {resource.active ? "Désactiver" : "Activer"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Historique global des réservations</h2>
 
         {reservations.length === 0 ? (
           <p>Aucune réservation.</p>
@@ -77,6 +115,7 @@ export default function AdminPage() {
                 <th>Date</th>
                 <th>Début</th>
                 <th>Fin</th>
+                <th>Créée le</th>
               </tr>
             </thead>
             <tbody>
@@ -86,6 +125,11 @@ export default function AdminPage() {
                   <td>{r.date}</td>
                   <td>{r.startTime}</td>
                   <td>{r.endTime}</td>
+                  <td>
+                    {new Date(r.createdAt).toLocaleDateString()}
+                    <br />
+                    {new Date(r.createdAt).toLocaleTimeString()}
+                </td>
                 </tr>
               ))}
             </tbody>
