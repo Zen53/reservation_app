@@ -6,6 +6,7 @@ import { getResources } from '../../api';
 import ResourceList from '../../components/ResourceList/ResourceList';
 import Loader from '../../components/Loader/Loader';
 import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
+
 import './HomePage.css';
 
 const HomePage = () => {
@@ -22,6 +23,8 @@ const HomePage = () => {
 
     const fetch = async () => {
       setLoading(true);
+      setError(null);
+
       const res = await getResources();
       if (!mounted) return;
 
@@ -30,7 +33,6 @@ const HomePage = () => {
         setResources([]);
       } else if (res.status === 200) {
         setResources(res.data || []);
-        setError(null);
       }
 
       setLoading(false);
@@ -40,7 +42,7 @@ const HomePage = () => {
     return () => { mounted = false; };
   }, [isAuthenticated]);
 
-  // CAS 1 — UTILISATEUR NON CONNECTÉ
+  /*CAS 1 — NON CONNECTÉ */
   if (!isAuthenticated) {
     return (
       <div className="page page--home">
@@ -60,7 +62,7 @@ const HomePage = () => {
     );
   }
 
-  // CAS 2 — UTILISATEUR CONNECTÉ
+  /*CAS 2 — CONNECTÉ*/
   return (
     <div className="page page--home">
       <header className="page__header">
@@ -77,7 +79,10 @@ const HomePage = () => {
       )}
 
       {!loading && !error && (
-        <ResourceList resources={resources} />
+        <ResourceList
+          resources={resources}
+          setResources={setResources}
+        />
       )}
     </div>
   );

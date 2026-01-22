@@ -27,7 +27,7 @@ export const resources = [
     description: "Petite salle de réunion - 6 personnes",
     capacity: 6,
     equipment: ["Écran TV"],
-    active: true
+    active: false // ressource désactivée (cas de test)
   },
   {
     id: 4,

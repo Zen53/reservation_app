@@ -1,37 +1,50 @@
-import { Link } from 'react-router-dom';
-import './ResourceCard.css';
+import { Link } from "react-router-dom";
+import { useAuth } from "../../auth/useAuth";
+import "./ResourceCard.css";
 
-/**
- * Composant ResourceCard
- * Affiche une carte pour une ressource (salle)
- */
-const ResourceCard = ({ resource }) => {
-  const { id, name, description, capacity, equipment } = resource;
+const ResourceCard = ({ resource, onToggleActive }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const isInactive = resource.active === false;
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    onToggleActive(resource.id);
+  };
 
   return (
-    <div className="resource-card">
+    <div className={`resource-card ${isInactive ? "inactive" : ""}`}>
       <div className="resource-card__header">
-        <h3 className="resource-card__title">{name}</h3>
-        <span className="resource-card__capacity">
-          👥 {capacity} pers.
-        </span>
+        <h3>{resource.name}</h3>
+        <span>{resource.capacity} pers.</span>
       </div>
-      
-      <p className="resource-card__description">{description}</p>
-      
-      {equipment && equipment.length > 0 && (
-        <div className="resource-card__equipment">
-          {equipment.map((item, index) => (
-            <span key={index} className="resource-card__tag">
-              {item}
-            </span>
-          ))}
-        </div>
-      )}
-      
-      <Link to={`/resources/${id}`} className="resource-card__link">
-        Voir les disponibilités →
-      </Link>
+
+      <p>{resource.description}</p>
+
+      <div className="resource-card__equipment">
+        {resource.equipment.map((eq, i) => (
+          <span key={i} className="tag">{eq}</span>
+        ))}
+      </div>
+
+      <div className="resource-card__footer">
+        {isAdmin && (
+          <button
+            className={`badge ${isInactive ? "off" : "on"}`}
+            onClick={handleToggle}
+          >
+            {isInactive ? "Désactivée" : "Active"}
+          </button>
+        )}
+
+        {!isInactive ? (
+          <Link to={`/resources/${resource.id}`}>
+            Voir les disponibilités →
+          </Link>
+        ) : (
+          <span className="disabled-text">Aucune ressource disponible</span>
+        )}
+      </div>
     </div>
   );
 };
