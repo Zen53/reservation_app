@@ -361,3 +361,33 @@ export const deleteReservation = async (reservationId) => {
 export const setSimulateServerError = (value) => {
   simulateServerError = value;
 };
+
+/**
+ * PATCH /resources/{id}/toggle
+ * Active / désactive une ressource
+ * 
+ * Réponses possibles :
+ * - 200 : Ressource mise à jour
+ * - 404 : Ressource inexistante
+ */
+export const toggleResourceActive = async (resourceId) => {
+  await delay(API_DELAY);
+
+  const resource = resources.find(r => r.id === parseInt(resourceId));
+
+  if (!resource) {
+    return {
+      status: 404,
+      data: null,
+      error: { message: "Resource not found" }
+    };
+  }
+
+  resource.active = !resource.active;
+
+  return {
+    status: 200,
+    data: resource,
+    error: null
+  };
+};

@@ -11,5 +11,6 @@ export {
   createReservation,
   getReservationById,
   deleteReservation,
-  setSimulateServerError
-} from './mockApi';
+  setSimulateServerError,
+  toggleResourceActive
+} from "./mockApi";

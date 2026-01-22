@@ -1,0 +1,78 @@
+/* ===== Admin Page ===== */
+
+.page section {
+    margin-bottom: 2rem;
+  }
+  
+  /* Espacement entre les lignes de ressources */
+  .page section ul li {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Zone texte à largeur fixe pour aligner les boutons */
+  .resource-label {
+    display: inline-block;
+    width: 260px; /* ajuste si besoin */
+  }
+  
+  /* ===== Boutons admin ===== */
+  .page button {
+    margin-left: 0.75rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  
+  /* Bouton Activer (ressource inactive) → GRIS */
+  .page .btn-activate {
+    background-color: #cecece;
+    color: #333333;
+  }
+  
+  .page .btn-activate:hover {
+    background-color: #bdbdbd;
+  }
+  
+  /* Bouton Désactiver (ressource active) → VERT */
+  .page .btn-desactivate {
+    background-color: #3a9d23;
+    color: #ffffff;
+  }
+  
+  .page .btn-desactivate:hover {
+    background-color: #31851d;
+  }
+  
+  /* ===== Tableau des réservations ===== */
+  .page table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  
+  .page thead th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #dddddd;
+  }
+  
+  .page tbody td {
+    padding: 0.75rem 1rem;
+    background-color: #f9f9f9;
+  }
+  
+  /* Arrondir les lignes du tableau */
+  .page tbody tr td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+  
+  .page tbody tr td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    line-height: 1.4;
+    white-space: pre-line;
+  }
