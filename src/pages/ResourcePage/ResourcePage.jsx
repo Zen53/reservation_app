@@ -157,7 +157,7 @@ const ResourcePage = () => {
           {isEditMode ? "Modifier la réservation" : "Détails de la ressource"}
         </h1>
         <p className="page__subtitle">
-          <Link to="/">← Retour à la liste</Link>
+        <Link to="/resources">← Retour à la liste des ressources</Link>
         </p>
       </header>
 
