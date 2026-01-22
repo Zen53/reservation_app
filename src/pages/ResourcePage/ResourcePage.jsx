@@ -5,19 +5,23 @@ import {
   getResourceAvailabilities,
   createReservation
 } from '../../api';
+
 import Loader from '../../components/Loader/Loader';
 import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
 import AvailabilityList from '../../components/AvailabilityList/AvailabilityList';
 import ReservationForm from '../../components/ReservationForm/ReservationForm';
 import SuccessMessage from '../../components/SuccessMessage/SuccessMessage';
+
 import './ResourcePage.css';
 
 const ResourcePage = () => {
   const { id } = useParams();
+
   const [resource, setResource] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitErrorStatus, setSubmitErrorStatus] = useState(null);
@@ -25,8 +29,11 @@ const ResourcePage = () => {
 
   useEffect(() => {
     let mounted = true;
+
     const fetch = async () => {
       setLoading(true);
+      setError(null);
+
       const resResource = await getResourceById(id);
       if (!mounted) return;
 
@@ -38,6 +45,12 @@ const ResourcePage = () => {
 
       if (resResource.status === 404) {
         setError('Ressource inexistante');
+        setLoading(false);
+        return;
+      }
+
+      if (resResource.data.active === false) {
+        setError('Cette ressource est actuellement désactivée');
         setLoading(false);
         return;
       }
@@ -74,7 +87,7 @@ const ResourcePage = () => {
     setSubmitErrorStatus(null);
 
     const payload = {
-      resourceId: parseInt(id),
+      resourceId: parseInt(id, 10),
       date: selectedSlot.date,
       startTime: selectedSlot.startTime,
       endTime: selectedSlot.endTime
@@ -84,8 +97,16 @@ const ResourcePage = () => {
 
     if (res.status === 201) {
       setReservationId(res.data.id);
-      // Retirer le créneau réservé de la liste locale pour refléter l'état
-      setAvailabilities(prev => prev.filter(s => !(s.date === selectedSlot.date && s.startTime === selectedSlot.startTime && s.endTime === selectedSlot.endTime)));
+      setAvailabilities(prev =>
+        prev.filter(
+          s =>
+            !(
+              s.date === selectedSlot.date &&
+              s.startTime === selectedSlot.startTime &&
+              s.endTime === selectedSlot.endTime
+            )
+        )
+      );
       setSelectedSlot(null);
     } else if (res.status === 400) {
       setSubmitErrorStatus(400);
@@ -118,7 +139,9 @@ const ResourcePage = () => {
           <section className="resource-info">
             <h2>{resource.name}</h2>
             <p className="resource-desc">{resource.description}</p>
-            <p className="resource-meta">Capacité: {resource.capacity} — Équipements: {resource.equipment.join(', ')}</p>
+            <p className="resource-meta">
+              Capacité : {resource.capacity} — Équipements : {resource.equipment.join(', ')}
+            </p>
           </section>
 
           <aside className="resource-actions">
@@ -145,15 +168,15 @@ const ResourcePage = () => {
             )}
 
             {submitErrorStatus === 409 && (
-              <ErrorMessage message={"Ce créneau n'est plus disponible"} type="error" />
+              <ErrorMessage message="Ce créneau n'est plus disponible" type="error" />
             )}
 
             {submitErrorStatus === 400 && (
-              <ErrorMessage message={"Les informations fournies sont incorrectes"} type="error" />
+              <ErrorMessage message="Les informations fournies sont incorrectes" type="error" />
             )}
 
             {submitErrorStatus === 500 && (
-              <ErrorMessage message={"Une erreur est survenue, veuillez réessayer plus tard"} type="error" />
+              <ErrorMessage message="Une erreur est survenue, veuillez réessayer plus tard" type="error" />
             )}
           </aside>
         </div>
@@ -161,5 +184,8 @@ const ResourcePage = () => {
     </div>
   );
 };
+<Link to="/resources" className="back-link">
+  ← Retour à la liste
+</Link>
 
 export default ResourcePage;
