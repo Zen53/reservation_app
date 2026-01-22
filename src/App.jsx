@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/routing/ProtectedRoute";
 
@@ -7,21 +7,30 @@ import Unauthorized from "./pages/auth/Unauthorized";
 import NotFound from "./pages/auth/NotFound";
 
 import HomePage from "./pages/HomePage";
+import ResourceListPage from "./pages/ResourceListPage";
 import ResourcePage from "./pages/ResourcePage";
+import ReservationPage from "./pages/ReservationPage";
+import MyReservationsPage from "./pages/MyReservationsPage";
 import AdminPage from "./pages/admin/AdminPage";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* Accueil public */}
+        {/* Accueil */}
         <Route path="/" element={<HomePage />} />
 
-        {/* Auth */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        {/* Liste des ressources */}
+        <Route
+          path="/resources"
+          element={
+            <ProtectedRoute>
+              <ResourceListPage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Ressource (détail uniquement) */}
+        {/* Détail ressource */}
         <Route
           path="/resources/:id"
           element={
@@ -31,17 +40,31 @@ export default function App() {
           }
         />
 
-        {/* Redirection /resources */}
+        {/* Détail réservation */}
         <Route
-          path="/resources"
+          path="/reservations/:id"
           element={
             <ProtectedRoute>
-              <Navigate to="/" replace />
+              <ReservationPage />
             </ProtectedRoute>
           }
         />
 
-        {/* Admin réel */}
+        {/* Historique utilisateur */}
+        <Route
+          path="/my-reservations"
+          element={
+            <ProtectedRoute>
+              <MyReservationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Auth */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+
+        {/* Admin */}
         <Route
           path="/admin"
           element={

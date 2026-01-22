@@ -1,1 +1,3 @@
-export { default } from "./ResourcePage";
+import ResourcePage from "./ResourcePage";
+
+export default ResourcePage;

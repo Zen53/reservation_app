@@ -13,3 +13,14 @@
   margin: 0 0 1.25rem 0;
   color: #475569;
 }
+
+.welcome-back {
+  margin: 1.5rem auto 2rem;
+  padding: 1rem 1.5rem;
+  max-width: 900px;
+  background-color: #f4f8f6;
+  border-left: 4px solid #3a9d23;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #333;
+}

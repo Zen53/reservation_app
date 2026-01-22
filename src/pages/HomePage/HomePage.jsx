@@ -1,59 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
-import { getResources } from '../../api';
-
-import ResourceList from '../../components/ResourceList/ResourceList';
-import Loader from '../../components/Loader/Loader';
-import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
 
 import './HomePage.css';
 
 const HomePage = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    let mounted = true;
-
-    const fetch = async () => {
-      setLoading(true);
-      setError(null);
-
-      const res = await getResources();
-      if (!mounted) return;
-
-      if (res.status === 500) {
-        setError('Une erreur est survenue, veuillez réessayer plus tard');
-        setResources([]);
-      } else if (res.status === 200) {
-        setResources(res.data || []);
-      }
-
-      setLoading(false);
-    };
-
-    fetch();
-    return () => { mounted = false; };
-  }, [isAuthenticated]);
-
-  /*CAS 1 — NON CONNECTÉ */
+  /* ===================== */
+  /* CAS 1 — NON CONNECTÉ  */
+  /* ===================== */
   if (!isAuthenticated) {
     return (
-      <div className="page page--home">
-        <header className="page__header">
-          <h1>Bienvenue sur l’application de réservation</h1>
-          <p className="page__subtitle">
-            Connectez-vous pour consulter les ressources et effectuer des réservations.
-          </p>
-        </header>
+      <div className="page page--home home-welcome">
+        <div className="welcome-card fade-in">
+          <h1>Bienvenue 👋</h1>
 
-        <div className="home-actions">
+          <p className="welcome-text">
+            Cette application vous permet de réserver facilement des ressources
+            (salles, créneaux horaires, équipements).
+          </p>
+
+          <p className="welcome-subtext">
+            Connectez-vous pour consulter les disponibilités et effectuer une réservation.
+          </p>
+
           <Link to="/login" className="home-button primary">
             Se connecter
           </Link>
@@ -62,28 +33,28 @@ const HomePage = () => {
     );
   }
 
-  /*CAS 2 — CONNECTÉ*/
+  /* ================= */
+  /* CAS 2 — CONNECTÉ */
+  /* ================= */
   return (
-    <div className="page page--home">
-      <header className="page__header">
-        <h1>Réservation — Ressources</h1>
-        <p className="page__subtitle">
-          Choisissez une salle pour voir les disponibilités
+    <div className="page page--home home-welcome">
+      <div className="welcome-card">
+        <h1>
+          Bon retour{user?.first_name ? `, ${user.first_name}` : ''} 👋
+        </h1>
+
+        <p className="welcome-text">
+          Vous êtes connecté à l’application de réservation.
         </p>
-      </header>
 
-      {loading && <Loader />}
+        <p className="welcome-subtext">
+          Accédez à la liste des ressources pour consulter les disponibilités.
+        </p>
 
-      {!loading && error && (
-        <ErrorMessage message={error} type="error" />
-      )}
-
-      {!loading && !error && (
-        <ResourceList
-          resources={resources}
-          setResources={setResources}
-        />
-      )}
+        <Link to="/resources" className="home-button primary">
+          Voir les ressources
+        </Link>
+      </div>
     </div>
   );
 };

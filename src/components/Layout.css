@@ -9,7 +9,28 @@
   align-items: center;
 }
 
-/* Bouton Déconnexion */
+/* ===== Liens de navigation ===== */
+
+.layout-nav a {
+  position: relative;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  padding-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+.layout-nav a:hover {
+  color: #3b82f6;
+}
+
+/* Lien actif (si NavLink est utilisé) */
+.layout-nav a.active {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+/* ===== Bouton Déconnexion ===== */
 
 .logout-button {
   padding: 0.4rem 0.8rem;
