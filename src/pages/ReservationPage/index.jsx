@@ -1,1 +1,3 @@
-export { default } from "./ReservationPage";
+import ReservationPage from "./ReservationPage";
+
+export default ReservationPage;

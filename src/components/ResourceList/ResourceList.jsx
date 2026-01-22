@@ -3,20 +3,24 @@ import "./ResourceList.css";
 
 const ResourceList = ({ resources, setResources }) => {
   const handleToggleActive = (id) => {
-    setResources(prev =>
-      prev.map(r =>
+    setResources((prev) =>
+      prev.map((r) =>
         r.id === id ? { ...r, active: !r.active } : r
       )
     );
   };
 
   if (!resources.length) {
-    return <p>Aucune ressource disponible</p>;
+    return (
+      <p className="empty-state">
+        Aucune ressource disponible pour le moment.
+      </p>
+    );
   }
 
   return (
     <div className="resource-list">
-      {resources.map(resource => (
+      {resources.map((resource) => (
         <ResourceCard
           key={resource.id}
           resource={resource}

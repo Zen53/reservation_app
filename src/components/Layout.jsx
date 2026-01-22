@@ -17,15 +17,23 @@ export default function Layout() {
     <>
       <header className="layout-header">
         {isAuthenticated && (
-        <span className="user-info">
-          Connecté : {user.first_name ? `${user.first_name} ${user.last_name}` : user.email}
+          <span className="user-info">
+            Connecté :{" "}
+            {user.first_name
+              ? `${user.first_name} ${user.last_name}`
+              : user.email}
           </span>
-          )}
+        )}
 
         <nav className="layout-nav">
           <Link to="/">Accueil</Link>
 
-          {isAuthenticated && <Link to="/resources">Ressources</Link>}
+          {isAuthenticated && (
+            <>
+              <Link to="/resources">Ressources</Link>
+              <Link to="/my-reservations">Mes réservations</Link>
+            </>
+          )}
 
           {isAuthenticated && user?.role === "admin" && (
             <Link to="/admin">Admin</Link>
