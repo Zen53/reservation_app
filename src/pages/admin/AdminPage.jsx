@@ -2,43 +2,44 @@ import "./AdminPage.css";
 import { useState, useEffect } from "react";
 import {
   getResources,
-  getResourceReservations,
-  toggleResourceActive
+  toggleResourceActive,
+  request
 } from "../../api";
 
 export default function AdminPage() {
   const [resources, setResources] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [stats, setStats] = useState({
+    resourcesCount: 0,
+    reservationsCount: 0
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     async function loadAdminData() {
       try {
+        // 🔹 Ressources
         const resourcesRes = await getResources();
-
-        if (resourcesRes.status !== 200) {
-          throw new Error("Erreur chargement ressources");
-        }
-
+        if (resourcesRes.status !== 200) throw new Error();
         setResources(resourcesRes.data);
 
-        const allReservations = [];
-
-        for (const resource of resourcesRes.data) {
-          const res = await getResourceReservations(resource.id);
-
-          if (res.status === 200) {
-            allReservations.push(
-              ...res.data.map((r) => ({
-                ...r,
-                resourceName: resource.name,
-              }))
-            );
-          }
+        // 🔹 Stats admin
+        const statsRes = await request(
+          "http://127.0.0.1:8000/reservations/admin/stats"
+        );
+        if (statsRes.status === 200) {
+          setStats(statsRes.data);
         }
 
-        setReservations(allReservations);
+        // 🔹 Toutes les réservations
+        const allRes = await request(
+          "http://127.0.0.1:8000/reservations/admin/all"
+        );
+        if (allRes.status === 200) {
+          setReservations(allRes.data);
+        }
       } catch {
         setError("Erreur lors du chargement des données administrateur");
       } finally {
@@ -49,15 +50,19 @@ export default function AdminPage() {
     loadAdminData();
   }, []);
 
-  const handleToggleActive = async (resourceId) => {
-    const response = await toggleResourceActive(resourceId);
+  const handleToggleActive = async (resource) => {
+    const newActive = !resource.active;
 
-    if (response.status === 200) {
+    const res = await toggleResourceActive(resource.id, newActive);
+
+    if (res.status === 200) {
       setResources((prev) =>
         prev.map((r) =>
-          r.id === resourceId ? response.data : r
+          r.id === resource.id ? { ...r, active: newActive } : r
         )
       );
+    } else {
+      alert("Impossible de modifier l’état de la ressource");
     }
   };
 
@@ -73,27 +78,30 @@ export default function AdminPage() {
     <div className="page">
       <h1>Dashboard Administrateur</h1>
 
+      {/* ================= STATS ================= */}
       <section>
         <h2>Statistiques globales</h2>
         <ul>
-          <li>Nombre de ressources : {resources.length}</li>
-          <li>Nombre total de réservations : {reservations.length}</li>
+          <li>Nombre de ressources : {stats.resourcesCount}</li>
+          <li>Nombre total de réservations : {stats.reservationsCount}</li>
         </ul>
       </section>
 
+      {/* ================= RESSOURCES ================= */}
       <section>
         <h2>Gestion des ressources</h2>
 
         <ul>
           {resources.map((resource) => (
             <li key={resource.id}>
-              <span className="resource-label">
-                <strong>{resource.name}</strong> —{" "}
-                {resource.active ? "Active" : "Inactive"}
-              </span>
+              <strong>{resource.name}</strong> —{" "}
+              {resource.active ? "Active" : "Inactive"}
+
               <button
-                className={resource.active ? "btn-desactivate" : "btn-activate"}
-                onClick={() => handleToggleActive(resource.id)}
+                className={
+                  resource.active ? "btn-desactivate" : "btn-activate"
+                }
+                onClick={() => handleToggleActive(resource)}
               >
                 {resource.active ? "Désactiver" : "Activer"}
               </button>
@@ -102,6 +110,7 @@ export default function AdminPage() {
         </ul>
       </section>
 
+      {/* ================= RÉSERVATIONS ================= */}
       <section>
         <h2>Historique global des réservations</h2>
 
@@ -112,6 +121,7 @@ export default function AdminPage() {
             <thead>
               <tr>
                 <th>Ressource</th>
+                <th>Utilisateur</th>
                 <th>Date</th>
                 <th>Début</th>
                 <th>Fin</th>
@@ -122,6 +132,7 @@ export default function AdminPage() {
               {reservations.map((r) => (
                 <tr key={r.id}>
                   <td>{r.resourceName}</td>
+                  <td>{r.userId}</td>
                   <td>{r.date}</td>
                   <td>{r.startTime}</td>
                   <td>{r.endTime}</td>
@@ -129,7 +140,7 @@ export default function AdminPage() {
                     {new Date(r.createdAt).toLocaleDateString()}
                     <br />
                     {new Date(r.createdAt).toLocaleTimeString()}
-                </td>
+                  </td>
                 </tr>
               ))}
             </tbody>

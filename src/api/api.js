@@ -4,7 +4,6 @@ const API_URL = "http://127.0.0.1:8000";
    AUTH HEADER
 ========================= */
 const getAuthHeaders = () => {
-  // ✅ PRIORITÉ AU TOKEN BACKEND
   const token =
     localStorage.getItem("access_token") ||
     localStorage.getItem("token");
@@ -15,7 +14,7 @@ const getAuthHeaders = () => {
 /* =========================
    REQUEST WRAPPER
 ========================= */
-const request = async (url, options = {}) => {
+export const request = async (url, options = {}) => {
   const headers = {
     ...getAuthHeaders(),
     ...(options.body ? { "Content-Type": "application/json" } : {}),
@@ -38,7 +37,7 @@ const request = async (url, options = {}) => {
       data: res.ok ? data : null,
       error: res.ok ? null : data,
     };
-  } catch (error) {
+  } catch {
     return {
       status: 500,
       data: null,
@@ -59,27 +58,15 @@ export const getResourceById = (id) =>
 export const getResourceAvailabilities = (id) =>
   request(`${API_URL}/resources/${id}/availabilities`);
 
-/**
- * Historique / compat ressource
- */
 export const getResourceReservations = (id) =>
   request(`${API_URL}/resources/${id}/reservations`);
 
 /* =========================
    RESERVATIONS (USER)
 ========================= */
-
-/**
- * MES RÉSERVATIONS
- * GET /reservations (protégé)
- */
 export const getReservations = () =>
   request(`${API_URL}/reservations`);
 
-/**
- * CRÉER UNE RÉSERVATION
- * POST /reservations (protégé)
- */
 export const createReservation = (payload) =>
   request(`${API_URL}/reservations`, {
     method: "POST",
@@ -95,8 +82,10 @@ export const deleteReservation = (id) =>
   });
 
 /* =========================
-   NO-OP (admin compat)
+   ADMIN
 ========================= */
-export const setSimulateServerError = () => {};
-export const toggleResourceActive = () =>
-  Promise.resolve({ status: 501, data: null, error: null });
+export const toggleResourceActive = (resourceId, active) =>
+  request(`${API_URL}/resources/${resourceId}/active`, {
+    method: "PATCH",
+    body: JSON.stringify({ active }),
+  });

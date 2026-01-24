@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.core.supabase import supabase
+from app.auth.dependencies import get_current_user
 from datetime import date, timedelta, datetime
 
 router = APIRouter(prefix="/resources", tags=["resources"])
@@ -9,15 +10,15 @@ router = APIRouter(prefix="/resources", tags=["resources"])
 # GET /resources
 # =========================
 @router.get("/")
-def get_resources():
+def get_resources(user=Depends(get_current_user)):
     try:
-        res = (
-            supabase
-            .table("resources")
-            .select("*")
-            .execute()
-        )
-        return res.data
+        query = supabase.table("resources").select("*")
+
+        # 🔐 USER → seulement actives
+        if user.get("role") != "admin":
+            query = query.eq("active", True)
+
+        return query.execute().data
     except Exception:
         raise HTTPException(
             status_code=500,
@@ -29,7 +30,7 @@ def get_resources():
 # GET /resources/{id}
 # =========================
 @router.get("/{resource_id}")
-def get_resource_by_id(resource_id: int):
+def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
     res = (
         supabase
         .table("resources")
@@ -42,7 +43,44 @@ def get_resource_by_id(resource_id: int):
     if not res:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    return res[0]
+    resource = res[0]
+
+    # 🔐 USER ne peut pas accéder à une ressource inactive
+    if user.get("role") != "admin" and resource.get("active") is False:
+        raise HTTPException(status_code=403, detail="Resource disabled")
+
+    return resource
+
+
+# =========================
+# PATCH /resources/{id}/active
+# (ADMIN ONLY)
+# =========================
+@router.patch("/{resource_id}/active")
+def toggle_resource_active(
+    resource_id: int,
+    payload: dict,
+    user=Depends(get_current_user)
+):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    if "active" not in payload:
+        raise HTTPException(status_code=400, detail="Missing 'active' field")
+
+    result = (
+        supabase
+        .table("resources")
+        .update({"active": payload["active"]})
+        .eq("id", resource_id)
+        .execute()
+        .data
+    )
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Resource not found")
+
+    return result[0]
 
 
 # =========================
@@ -62,11 +100,25 @@ def get_resource_rules(resource_id: int):
 
 # =========================
 # GET /resources/{id}/availabilities
-# (CALCUL DYNAMIQUE — VERSION STABLE)
 # =========================
 @router.get("/{resource_id}/availabilities")
-def get_resource_availabilities(resource_id: int):
-    # 🔹 Règles horaires
+def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)):
+    resource = (
+        supabase
+        .table("resources")
+        .select("active")
+        .eq("id", resource_id)
+        .execute()
+        .data
+    )
+
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+
+    # 🔒 AUCUN créneau si inactive
+    if resource[0]["active"] is False:
+        return []
+
     rules = (
         supabase
         .table("resource_rules")
@@ -79,7 +131,6 @@ def get_resource_availabilities(resource_id: int):
     if not rules:
         return []
 
-    # 🔹 Réservations existantes
     reservations = (
         supabase
         .table("reservations")
@@ -91,90 +142,49 @@ def get_resource_availabilities(resource_id: int):
 
     today = date.today()
     end_date = today + timedelta(days=7)
-
     availabilities = []
 
     current_day = today
     while current_day <= end_date:
-        weekday = current_day.weekday()  # 0 = lundi
+        weekday = current_day.weekday()
 
         for rule in rules:
-            # 🔒 Sécurisation complète des données DB
-            if (
-                "day_of_week" not in rule
-                or "open_time" not in rule
-                or "close_time" not in rule
-                or "slot_duration_minutes" not in rule
-                or rule["slot_duration_minutes"] is None
-            ):
-                continue
-
-            if rule["day_of_week"] != weekday:
+            if rule.get("day_of_week") != weekday:
                 continue
 
             open_time = datetime.combine(
                 current_day,
-                datetime.strptime(
-                    str(rule["open_time"])[:8],
-                    "%H:%M:%S"
-                ).time()
+                datetime.strptime(str(rule["open_time"])[:8], "%H:%M:%S").time()
             )
-
             close_time = datetime.combine(
                 current_day,
-                datetime.strptime(
-                    str(rule["close_time"])[:8],
-                    "%H:%M:%S"
-                ).time()
+                datetime.strptime(str(rule["close_time"])[:8], "%H:%M:%S").time()
             )
 
-            slot_duration = timedelta(
-                minutes=int(rule["slot_duration_minutes"])
-            )
-
+            slot_duration = timedelta(minutes=int(rule["slot_duration_minutes"]))
             slot_start = open_time
 
             while slot_start + slot_duration <= close_time:
                 slot_end = slot_start + slot_duration
-
-                # 🔎 Vérifier si le créneau est déjà réservé
                 is_reserved = False
 
                 for r in reservations:
-                    # ✅ Normalisation de la date (str ou date)
-                    reservation_date = (
-                        r["date"]
-                        if isinstance(r["date"], str)
-                        else r["date"].isoformat()
-                    )
-
-                    if reservation_date != slot_start.date().isoformat():
+                    if r["date"] != slot_start.date().isoformat():
                         continue
 
                     reserved_start = datetime.combine(
                         slot_start.date(),
-                        datetime.strptime(
-                            str(r["start_time"])[:8],
-                            "%H:%M:%S"
-                        ).time()
+                        datetime.strptime(str(r["start_time"])[:8], "%H:%M:%S").time()
                     )
                     reserved_end = datetime.combine(
                         slot_start.date(),
-                        datetime.strptime(
-                            str(r["end_time"])[:8],
-                            "%H:%M:%S"
-                        ).time()
+                        datetime.strptime(str(r["end_time"])[:8], "%H:%M:%S").time()
                     )
 
-                    # ❌ Chevauchement → créneau bloqué
-                    if not (
-                        slot_end <= reserved_start
-                        or slot_start >= reserved_end
-                    ):
+                    if not (slot_end <= reserved_start or slot_start >= reserved_end):
                         is_reserved = True
                         break
 
-                # ✅ Créneau libre
                 if not is_reserved:
                     availabilities.append({
                         "date": slot_start.date().isoformat(),
@@ -187,32 +197,3 @@ def get_resource_availabilities(resource_id: int):
         current_day += timedelta(days=1)
 
     return availabilities
-
-
-# =========================
-# GET /resources/{id}/reservations
-# =========================
-@router.get("/{resource_id}/reservations")
-def get_resource_reservations(resource_id: int):
-    rows = (
-        supabase
-        .table("reservations")
-        .select("*")
-        .eq("resource_id", resource_id)
-        .order("date", desc=False)
-        .order("start_time", desc=False)
-        .execute()
-        .data
-    )
-
-    return [
-        {
-            "id": r["id"],
-            "resourceId": r["resource_id"],
-            "date": r["date"],
-            "startTime": r["start_time"],
-            "endTime": r["end_time"],
-            "createdAt": r["created_at"],
-        }
-        for r in rows
-    ]
