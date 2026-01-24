@@ -1,93 +1,159 @@
-# Reservation App (Mock)
+# Reservation App
 
-Application React de réservation (mock) respectant strictement le contrat API fourni.
-
-## Résumé
-- Frontend React (fonctionnel + Hooks).
-- API simulée dans `src/api` (mockApi.js + mockData.js).
-- Aucun backend réel; le frontend n'invente pas de comportements autres que ceux du contrat.
-
-## Arborescence importante
-- `src/api/` : mock API et données (respect du contrat).
-- `src/components/` : composants UI réutilisables.
-- `src/pages/` : pages (`HomePage`, `ResourcePage`, `ReservationPage`).
-- `src/__tests__/` : tests unitaires sur le mock API.
-- `scripts/check_api.js` : script simple de vérification du contrat.
-
-## Prérequis
-- Node.js (v20+ recommandé). Sur votre machine actuelle, Vite fonctionne mais certains paquets peuvent émettre des warnings si Node < 20.19.
-
-## Installation
-À la racine du projet:
-
-```bash
-npm install
-```
-
-## Lancer le serveur de dev
-```bash
-npm run dev
-```
-Ouvrir ensuite `http://localhost:5173` (Vite affiche l'URL exacte).
-
-## Tests automatisés
-- Tests unitaires avec Vitest :
-
-```bash
-npm test
-# ou
-npx vitest run
-```
-
-- Vérification rapide du contrat API (script JS) :
-
-```bash
-node scripts/check_api.js
-```
-
-## Mock API et simulation d'erreurs
-- Le mock respecte strictement le contrat API défini (statuts 200/201/400/404/409/500, etc.).
-- Pour simuler une erreur serveur (500) : utiliser `setSimulateServerError(true)` dans `src/api/mockApi.js` (ou appeler l'export `setSimulateServerError(true)` depuis la console si vous modifiez le code).
-
-## Messages utilisateur obligatoires
-Le frontend affiche exactement les messages suivants selon la réponse API :
-- Aucune disponibilité (200 liste vide) → « Aucun créneau disponible pour cette date »
-- Conflit (409) → « Ce créneau n’est plus disponible »
-- Données invalides (400) → « Les informations fournies sont incorrectes »
-- Action en cours (bouton désactivé pendant l'appel) → texte du bouton : « Réservation en cours… »
-- Erreur technique (500 / 503) → « Une erreur est survenue, veuillez réessayer plus tard »
-
-Ces messages sont utilisés uniquement lorsqu'ils sont explicitement renvoyés par le mock API ou mappés depuis les codes HTTP ci-dessus.
-
-## Conformité au contrat
-- Toutes les routes listées dans le contrat sont implémentées dans `src/api/mockApi.js` :
-  - `GET /resources` → `getResources()`
-  - `GET /resources/{id}/availabilities` → `getResourceAvailabilities(id)`
-  - `GET /resources/{id}/reservations` → `getResourceReservations(id)`
-  - `POST /reservations` → `createReservation(payload)`
-  - `GET /reservations/{id}` → `getReservationById(id)`
-  - `DELETE /reservations/{id}` → `deleteReservation(id)` (optionnel)
-- Le frontend n'ajoute aucune logique métier back-end supplémentaire : affichage et gestion d'état uniquement.
-
-## Notes techniques rapides
-- Navigation : `react-router-dom` (routes principales définies dans `src/App.jsx`).
-- Styles : CSS simple dans chaque composant/page (pas de framework CSS externe).
-- Tests : `src/__tests__/api.test.js` couvre les cas contractuels (200/400/404/409/500).
-
-## Prochaines suggestions
-- Ajouter tests d'intégration UI (`@testing-library/react`) si souhaité.
-- Ajouter storybook pour visualiser les composants isolés.
+Application complète de réservation de ressources avec **frontend React** et **backend FastAPI**, authentification par token JWT et gestion des rôles **utilisateur / administrateur**.
 
 ---
+
+## Résumé
+
+- Frontend React (Vite + Hooks)
+- Backend FastAPI (API REST)
+- Base de données Supabase (PostgreSQL)
+- Authentification JWT
+- Gestion des rôles user / admin
+- Créneaux générés dynamiquement
+- Tableau de bord administrateur
+
+---
+
+## Fonctionnalités
+
+### Utilisateur
+
+- Connexion par email
+- Consultation des ressources actives
+- Visualisation des créneaux disponibles
+- Création de réservations
+- Consultation de ses réservations
+- Suppression de ses réservations
+
+### Administrateur
+
+- Connexion avec rôle administrateur
+- Accès à un dashboard dédié
+- Activation / désactivation des ressources
+- Visualisation du nombre total de ressources
+- Visualisation du nombre total de réservations
+- Consultation de toutes les réservations (tous utilisateurs confondus)
+
+---
+
+## Prérequis
+
+### Frontend
+
+- Node.js v18 minimum (v20 recommandé)
+- npm ou yarn
+
 ### Backend
-- Pour lancer backend(Git Bash / Windows):
-  Activer le venv: `source venv/Scripts/activate`
-  puis `uvicorn app.main:app --reload`
-### Authentification
 
-L’application utilise une authentification mock par token.
-Le backend (FastAPI) génère un token lors du login.
-Ce token est stocké côté frontend et utilisé pour protéger les routes.
+- Python 3.10+
+- virtualenv / venv
+- Compte Supabase (PostgreSQL)
 
-Les rôles utilisateur / admin permettent de restreindre l’accès à certaines pages
-(ex : espace administrateur).
+---
+
+## Installation
+
+### Backend
+
+1. Se placer dans le dossier backend
+2. Créer et activer l’environnement virtuel
+
+python -m venv venv  
+source venv/bin/activate        (macOS)  
+venv\\Scripts\\activate         (Windows)
+
+3. Installer les dépendances
+
+pip install -r requirements.txt
+
+4. Créer un fichier .env à la racine du backend
+
+SUPABASE_URL=  
+SUPABASE_ANON_KEY=  
+SUPABASE_SERVICE_ROLE_KEY=  
+JWT_SECRET_KEY=  
+ADMIN_CODE=
+
+---
+
+### Frontend
+
+1. Se placer dans le dossier frontend
+2. Installer les dépendances
+
+npm install
+
+---
+
+## Lancer le projet
+
+### Backend
+
+uvicorn app.main:app --reload --env-file .env
+
+- API disponible sur http://127.0.0.1:8000
+- Swagger disponible sur http://127.0.0.1:8000/docs
+
+---
+
+### Frontend
+
+npm run dev
+
+- Application disponible sur http://localhost:5173
+
+---
+
+## Authentification
+
+- Le backend génère un token JWT lors de la connexion
+- Le token est stocké côté frontend (localStorage)
+- Chaque requête protégée utilise l’en-tête Authorization Bearer
+- Les routes sont protégées selon le rôle utilisateur ou administrateur
+
+---
+
+## Messages utilisateur obligatoires
+
+- Aucun créneau disponible → "Aucun créneau disponible pour cette période"
+- Conflit de réservation (409) → "Ce créneau n’est plus disponible"
+- Données invalides (400) → "Les informations fournies sont incorrectes"
+- Action en cours → Bouton désactivé avec le texte "Réservation en cours…"
+- Erreur serveur (500 / 503) → "Une erreur est survenue, veuillez réessayer plus tard"
+
+---
+
+## Conformité au contrat API
+
+### Ressources
+
+- GET /resources
+- GET /resources/{id}
+- PATCH /resources/{id}/active (admin)
+- GET /resources/{id}/availabilities
+- GET /resources/{id}/reservations
+
+### Réservations utilisateur
+
+- POST /reservations
+- GET /reservations
+- GET /reservations/{id}
+- DELETE /reservations/{id}
+
+### Administration
+
+- GET /reservations/admin/stats
+- GET /reservations/admin/all
+
+---
+
+## Notes techniques
+
+- Frontend : React + Vite + React Router
+- Backend : FastAPI + JWT
+- Base de données : Supabase (PostgreSQL)
+- Créneaux calculés dynamiquement à partir des règles horaires
+- Détection des conflits côté backend
+- Séparation stricte des rôles user / admin
