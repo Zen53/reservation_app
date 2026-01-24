@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getResources, getResourceReservations } from "../../api";
+import { getReservations } from "../../api";
 
 import Loader from "../../components/Loader/Loader";
 import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
@@ -14,37 +14,25 @@ const MyReservationsPage = () => {
     let mounted = true;
 
     const fetchReservations = async () => {
-      try {
-        const resourcesRes = await getResources();
+      setLoading(true);
+      setError(null);
 
-        if (resourcesRes.status !== 200) {
-          throw new Error();
-        }
+      const res = await getReservations();
+      if (!mounted) return;
 
-        const allReservations = [];
-
-        for (const resource of resourcesRes.data) {
-          const res = await getResourceReservations(resource.id);
-
-          if (res.status === 200) {
-            allReservations.push(
-              ...res.data.map((r) => ({
-                ...r,
-                resourceName: resource.name,
-              }))
-            );
-          }
-        }
-
-        if (mounted) setReservations(allReservations);
-      } catch {
-        if (mounted) setError("Impossible de charger vos réservations.");
-      } finally {
-        if (mounted) setLoading(false);
+      if (res.status === 401 || res.status === 403) {
+        setError("Vous devez être connecté pour voir vos réservations.");
+      } else if (res.status !== 200) {
+        setError("Impossible de charger vos réservations.");
+      } else {
+        setReservations(Array.isArray(res.data) ? res.data : []);
       }
+
+      setLoading(false);
     };
 
     fetchReservations();
+
     return () => {
       mounted = false;
     };

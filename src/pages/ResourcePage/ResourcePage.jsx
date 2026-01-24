@@ -46,7 +46,6 @@ const ResourcePage = () => {
       setLoading(true);
       setError(null);
 
-      /* ===== Ressource ===== */
       const resResource = await getResourceById(id);
       if (!mounted) return;
 
@@ -64,16 +63,9 @@ const ResourcePage = () => {
 
       setResource(resResource.data);
 
-      /* ===== Disponibilités ===== */
       const resAvail = await getResourceAvailabilities(id);
-      if (!mounted) return;
+      let slots = resAvail.status === 200 ? resAvail.data || [] : [];
 
-      let slots = [];
-      if (resAvail.status === 200) {
-        slots = resAvail.data || [];
-      }
-
-      /* ===== MODE ÉDITION : préchargement ===== */
       if (isEditMode) {
         const resReservation = await getReservationById(reservationId);
 
@@ -84,7 +76,6 @@ const ResourcePage = () => {
             endTime: resReservation.data.endTime
           };
 
-          // Réinjecter le créneau actuel s’il n’existe plus
           const exists = slots.some(
             s =>
               s.date === currentSlot.date &&
@@ -105,9 +96,7 @@ const ResourcePage = () => {
     };
 
     fetch();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [id, isEditMode, reservationId]);
 
   const handleSelectSlot = (slot) => {
@@ -118,31 +107,39 @@ const ResourcePage = () => {
   const handleSubmit = async () => {
     if (!selectedSlot || isSubmitting) return;
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitErrorStatus(null);
 
+    const payload = {
+      resourceId: parseInt(id, 10),
+      date: selectedSlot.date,
+      startTime: selectedSlot.startTime,
+      endTime: selectedSlot.endTime
+    };
+
     try {
-      // 🧹 MODE ÉDITION → supprimer l’ancienne réservation
+      // ➕ Créer d’abord
+      const resCreate = await createReservation(payload);
+
+      if (resCreate.status !== 201) {
+        setSubmitErrorStatus(resCreate.status);
+        return;
+      }
+
+      const newReservationId = resCreate.data.id;
+
+      // 🧹 Puis supprimer l’ancienne si édition
       if (isEditMode) {
         await deleteReservation(reservationId);
       }
 
-      // ➕ Créer la nouvelle réservation
-      const payload = {
-        resourceId: parseInt(id, 10),
-        date: selectedSlot.date,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime
-      };
-
-      const res = await createReservation(payload);
-
-      if (res.status === 201) {
-        navigate(`/reservations/${res.data.id}`);
-        return;
-      }
-
-      setSubmitErrorStatus(res.status);
+      navigate(`/reservations/${newReservationId}`);
     } catch {
       setSubmitErrorStatus(500);
     } finally {
@@ -157,7 +154,7 @@ const ResourcePage = () => {
           {isEditMode ? "Modifier la réservation" : "Détails de la ressource"}
         </h1>
         <p className="page__subtitle">
-        <Link to="/resources">← Retour à la liste des ressources</Link>
+          <Link to="/resources">← Retour à la liste des ressources</Link>
         </p>
       </header>
 

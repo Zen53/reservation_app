@@ -1,14 +1,32 @@
-from fastapi import Header, HTTPException
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.security import decode_fake_token
 
-def get_current_user(authorization: str = Header(None)):
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+# 🔐 Déclare la sécurité pour Swagger
+security = HTTPBearer()
 
-    token = authorization.replace("Bearer ", "")
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+    Dépendance d'authentification :
+    - affiche Authorize dans Swagger
+    - protège les routes
+    """
+
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    token = credentials.credentials
     payload = decode_fake_token(token)
 
     if not payload:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
 
     return payload

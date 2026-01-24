@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import './ReservationForm.css';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 
@@ -16,17 +15,28 @@ const ReservationForm = ({
   selectedSlot, 
   onSubmit, 
   isSubmitting,
-  error 
+  error,
+  isEdit = false // 🆕 mode modification
 }) => {
   // Formater la date pour l'affichage
   const formatDate = (dateStr) => {
-    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const options = {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    };
     return new Date(dateStr).toLocaleDateString('fr-FR', options);
   };
 
   // Mapper les codes d'erreur API vers les messages utilisateur
-  const getErrorMessage = (errorStatus) => {
-    switch (errorStatus) {
+  const getErrorMessage = (errorValue) => {
+    const status =
+      typeof errorValue === 'number'
+        ? errorValue
+        : errorValue?.status;
+
+    switch (status) {
       case 400:
         return "Les informations fournies sont incorrectes";
       case 409:
@@ -49,7 +59,16 @@ const ReservationForm = ({
 
   return (
     <div className="reservation-form">
-      <h3 className="reservation-form__title">Confirmer la réservation</h3>
+      <h3 className="reservation-form__title">
+        {isEdit ? "Modifier la réservation" : "Confirmer la réservation"}
+      </h3>
+
+      {isEdit && (
+        <p className="reservation-form__info">
+          ⚠️ Cette action annulera votre réservation actuelle
+          puis en créera une nouvelle.
+        </p>
+      )}
       
       <div className="reservation-form__summary">
         <div className="reservation-form__row">
@@ -65,7 +84,7 @@ const ReservationForm = ({
         <div className="reservation-form__row">
           <span className="reservation-form__label">Horaire</span>
           <span className="reservation-form__value">
-            {selectedSlot.startTime} - {selectedSlot.endTime}
+            {selectedSlot.startTime} – {selectedSlot.endTime}
           </span>
         </div>
       </div>
@@ -82,7 +101,12 @@ const ReservationForm = ({
         onClick={onSubmit}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Réservation en cours…" : "Confirmer la réservation"}
+        {isSubmitting
+          ? "Traitement en cours…"
+          : isEdit
+            ? "Modifier la réservation"
+            : "Confirmer la réservation"
+        }
       </button>
     </div>
   );

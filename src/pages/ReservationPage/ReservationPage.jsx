@@ -53,7 +53,11 @@ const ReservationPage = () => {
 
     if (res.status === 204) {
       setCancelSuccess(true);
-      setReservation(null);
+
+      // ⏱ Redirection après confirmation
+      setTimeout(() => {
+        navigate('/resources');
+      }, 1500);
     } else {
       setError("Impossible d’annuler la réservation.");
     }
@@ -61,9 +65,6 @@ const ReservationPage = () => {
     setCancelLoading(false);
   };
 
-  /* ============================
-     MODIFICATION DE RÉSERVATION
-     ============================ */
   const handleModify = () => {
     navigate(
       `/resources/${reservation.resourceId}?mode=edit&reservationId=${reservation.id}`
@@ -87,7 +88,9 @@ const ReservationPage = () => {
 
       {cancelSuccess && (
         <p className="success-message">
-          ✅ La réservation a été annulée avec succès.
+          ✅ La réservation a été annulée avec succès.  
+          <br />
+          Redirection en cours…
         </p>
       )}
 
