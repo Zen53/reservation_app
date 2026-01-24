@@ -16,16 +16,8 @@ export default function Layout() {
   return (
     <>
       <header className="layout-header">
-        {isAuthenticated && (
-          <span className="user-info">
-            Connecté :{" "}
-            {user.first_name
-              ? `${user.first_name} ${user.last_name}`
-              : user.email}
-          </span>
-        )}
-
-        <nav className="layout-nav">
+        {/* GAUCHE : menu */}
+        <nav className="layout-nav layout-left">
           <Link to="/">Accueil</Link>
 
           {isAuthenticated && (
@@ -40,13 +32,36 @@ export default function Layout() {
           )}
 
           {!isAuthenticated && <Link to="/login">Connexion</Link>}
-
-          {isAuthenticated && (
-            <button onClick={handleLogout} className="logout-button">
-              Déconnexion
-            </button>
-          )}
         </nav>
+
+        {/* CENTRE : logo */}
+        <div className="layout-logo">
+          <img
+            src="/logo_reservation.png"
+            alt="Logo Reservation App"
+          />
+        </div>
+
+        {/* DROITE : utilisateur */}
+        <div className="layout-right">
+          {isAuthenticated && (
+            <>
+              <span className="user-info">
+                Connecté :{" "}
+                {user.first_name
+                  ? `${user.first_name} ${user.last_name}`
+                  : user.email}
+              </span>
+
+              <button
+                onClick={handleLogout}
+                className="logout-button"
+              >
+                Déconnexion
+              </button>
+            </>
+          )}
+        </div>
       </header>
 
       <main>

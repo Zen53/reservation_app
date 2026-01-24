@@ -1,15 +1,45 @@
 .layout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 1rem;
+  height: 72px;
   border-bottom: 1px solid #ddd;
 }
 
-.layout-nav {
+/* ===== Zones ===== */
+
+.layout-left,
+.layout-right {
   display: flex;
-  gap: 1rem;
   align-items: center;
+  gap: 1rem;
+  min-width: 33%;
 }
 
-/* ===== Liens de navigation ===== */
+.layout-left {
+  justify-content: flex-start;
+}
+
+.layout-right {
+  justify-content: flex-end;
+}
+
+.layout-logo {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+/* ===== Logo ===== */
+
+.layout-logo img {
+  max-height: 130px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ===== Navigation ===== */
 
 .layout-nav a {
   position: relative;
@@ -24,10 +54,16 @@
   color: #3b82f6;
 }
 
-/* Lien actif (si NavLink est utilisé) */
 .layout-nav a.active {
   color: #3b82f6;
   font-weight: 600;
+}
+
+/* ===== User info ===== */
+
+.user-info {
+  font-size: 0.9rem;
+  color: #444;
 }
 
 /* ===== Bouton Déconnexion ===== */
@@ -45,4 +81,26 @@
 
 .logout-button:hover {
   background-color: #f2f2f2;
+}
+
+main {
+  position: relative;
+  min-height: calc(100vh - 72px); /* hauteur écran - header */
+  background-image: url("/background_reservation.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+}
+
+main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.75);
+  z-index: 0;
+}
+
+main > * {
+  position: relative;
+  z-index: 1;
 }
