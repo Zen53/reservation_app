@@ -4,10 +4,86 @@ from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
+# ==================================================
+# ================= ADMIN ==========================
+# ==================================================
 
-# =========================
+# ==================================================
+# GET /reservations/admin/stats
+# ==================================================
+@router.get("/admin/stats")
+def admin_stats(
+    user=Depends(get_current_user)
+):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    resources_count = (
+        supabase.table("resources").select("id").execute().data
+    )
+
+    reservations_count = (
+        supabase.table("reservations").select("id").execute().data
+    )
+
+    return {
+        "resourcesCount": len(resources_count),
+        "reservationsCount": len(reservations_count)
+    }
+
+
+# ==================================================
+# GET /reservations/admin/all
+# ==================================================
+@router.get("/admin/all")
+def admin_all_reservations(
+    user=Depends(get_current_user)
+):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    data = (
+        supabase
+        .table("reservations")
+        .select("""
+            id,
+            resource_id,
+            user_id,
+            date,
+            start_time,
+            end_time,
+            created_at,
+            resources (
+                name
+            )
+        """)
+        .order("created_at", desc=True)
+        .execute()
+        .data
+    )
+
+    return [
+        {
+            "id": r["id"],
+            "resourceId": r["resource_id"],
+            "resourceName": r["resources"]["name"],
+            "userId": r["user_id"],
+            "date": r["date"],
+            "startTime": r["start_time"],
+            "endTime": r["end_time"],
+            "createdAt": r["created_at"]
+        }
+        for r in data
+    ]
+
+
+# ==================================================
+# ================= USER ===========================
+# ==================================================
+
+# ==================================================
 # POST /reservations
-# =========================
+# ==================================================
 @router.post("/", status_code=201)
 def create_reservation(
     payload: dict,
@@ -25,7 +101,6 @@ def create_reservation(
 
     user_id = user["user_id"]
 
-    # 🔎 VÉRIFICATION DE CONFLIT (LOGIQUE CORRECTE)
     conflicts = (
         supabase
         .table("reservations")
@@ -41,7 +116,6 @@ def create_reservation(
     if conflicts:
         raise HTTPException(status_code=409, detail="Time slot already booked")
 
-    # ✅ INSERT
     result = (
         supabase
         .table("reservations")
@@ -58,11 +132,11 @@ def create_reservation(
     return {"id": result.data[0]["id"]}
 
 
-# =========================
+# ==================================================
 # GET /reservations (MES RÉSERVATIONS)
-# =========================
+# ==================================================
 @router.get("/")
-def get_all_reservations(
+def get_my_reservations(
     user=Depends(get_current_user)
 ):
     user_id = user["user_id"]
@@ -102,9 +176,9 @@ def get_all_reservations(
     ]
 
 
-# =========================
+# ==================================================
 # GET /reservations/{id}
-# =========================
+# ==================================================
 @router.get("/{reservation_id}")
 def get_reservation_by_id(
     reservation_id: int,
@@ -149,9 +223,9 @@ def get_reservation_by_id(
     }
 
 
-# =========================
+# ==================================================
 # DELETE /reservations/{id}
-# =========================
+# ==================================================
 @router.delete("/{reservation_id}", status_code=204)
 def delete_reservation(
     reservation_id: int,
