@@ -8,21 +8,23 @@ export default function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  Promise.resolve().then(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+  // Au chargement de l'application :
+  // on vérifie si un utilisateur est déjà connecté
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      }
 
-    setLoading(false);
-  });
-}, []);
+      setLoading(false);
+    });
+  }, []);
 
-
+  // Connexion utilisateur ou admin
   const login = async (role, payload) => {
     const response = await fetch(`${API_URL}/auth/login/${role}`, {
       method: "POST",
@@ -43,6 +45,8 @@ useEffect(() => {
     localStorage.setItem("user", JSON.stringify(data.user));
   };
 
+  // Déconnexion :
+  // on vide l'état et le localStorage
   const logout = () => {
     setToken(null);
     setUser(null);

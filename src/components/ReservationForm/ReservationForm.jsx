@@ -1,35 +1,37 @@
 import './ReservationForm.css';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 
-/**
- * Composant ReservationForm
- * Formulaire de confirmation de réservation
- * 
- * Messages d'erreur selon le contrat API:
- * - 400: "Les informations fournies sont incorrectes"
- * - 409: "Ce créneau n'est plus disponible"
- * - 500: "Une erreur est survenue, veuillez réessayer plus tard"
- */
-const ReservationForm = ({ 
-  resource, 
-  selectedSlot, 
-  onSubmit, 
+/*
+  Formulaire de confirmation d’une réservation.
+  Il affiche un récapitulatif du créneau sélectionné
+  et permet de valider la réservation.
+*/
+const ReservationForm = ({
+  resource,
+  selectedSlot,
+  onSubmit,
   isSubmitting,
   error,
-  isEdit = false // 🆕 mode modification
+  isEdit = false
 }) => {
-  // Formater la date pour l'affichage
+
+  /*
+    Met en forme une date pour l’affichage
+    (format lisible en français)
+  */
   const formatDate = (dateStr) => {
-    const options = {
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric'
-    };
-    return new Date(dateStr).toLocaleDateString('fr-FR', options);
+    });
   };
 
-  // Mapper les codes d'erreur API vers les messages utilisateur
+  /*
+    Associe un code d’erreur API
+    à un message utilisateur clair
+  */
   const getErrorMessage = (errorValue) => {
     const status =
       typeof errorValue === 'number'
@@ -60,27 +62,33 @@ const ReservationForm = ({
   return (
     <div className="reservation-form">
       <h3 className="reservation-form__title">
-        {isEdit ? "Modifier la réservation" : "Confirmer la réservation"}
+        {isEdit
+          ? "Modifier la réservation"
+          : "Confirmer la réservation"}
       </h3>
 
       {isEdit && (
         <p className="reservation-form__info">
-          ⚠️ Cette action annulera votre réservation actuelle
-          puis en créera une nouvelle.
+          Cette action annulera la réservation actuelle
+          avant d’en créer une nouvelle.
         </p>
       )}
-      
+
       <div className="reservation-form__summary">
         <div className="reservation-form__row">
           <span className="reservation-form__label">Salle</span>
-          <span className="reservation-form__value">{resource?.name}</span>
+          <span className="reservation-form__value">
+            {resource?.name}
+          </span>
         </div>
+
         <div className="reservation-form__row">
           <span className="reservation-form__label">Date</span>
           <span className="reservation-form__value">
             {formatDate(selectedSlot.date)}
           </span>
         </div>
+
         <div className="reservation-form__row">
           <span className="reservation-form__label">Horaire</span>
           <span className="reservation-form__value">
@@ -90,9 +98,9 @@ const ReservationForm = ({
       </div>
 
       {error && (
-        <ErrorMessage 
-          message={getErrorMessage(error)} 
-          type="error" 
+        <ErrorMessage
+          message={getErrorMessage(error)}
+          type="error"
         />
       )}
 
@@ -105,8 +113,7 @@ const ReservationForm = ({
           ? "Traitement en cours…"
           : isEdit
             ? "Modifier la réservation"
-            : "Confirmer la réservation"
-        }
+            : "Confirmer la réservation"}
       </button>
     </div>
   );

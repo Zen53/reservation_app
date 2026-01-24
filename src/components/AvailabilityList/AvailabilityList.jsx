@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import './AvailabilityList.css';
-import AvailabilitySlot from '../AvailabilitySlot/AvailabilitySlot';
-import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import { useState } from "react";
+import "./AvailabilityList.css";
+import AvailabilitySlot from "../AvailabilitySlot/AvailabilitySlot";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-/**
- * Composant AvailabilityList
- * Affiche la liste des créneaux disponibles pour une ressource
- * - Groupés par jour
- * - Déroulants (accordion)
- */
+/*
+  Affiche les créneaux disponibles d’une ressource.
+  Les créneaux sont regroupés par jour
+  et affichés sous forme de liste déroulante.
+*/
 const AvailabilityList = ({
   availabilities,
   selectedSlot,
@@ -17,7 +16,7 @@ const AvailabilityList = ({
 }) => {
   const [openDate, setOpenDate] = useState(null);
 
-  // Aucun créneau
+  // Aucun créneau disponible
   if (!availabilities || availabilities.length === 0) {
     return (
       <ErrorMessage
@@ -27,7 +26,7 @@ const AvailabilityList = ({
     );
   }
 
-  // 🔹 Grouper les créneaux par date
+  // Regroupement des créneaux par date
   const groupedByDate = availabilities.reduce((acc, slot) => {
     if (!acc[slot.date]) {
       acc[slot.date] = [];
@@ -36,8 +35,9 @@ const AvailabilityList = ({
     return acc;
   }, {});
 
+  // Ouvre ou ferme un jour
   const toggleDate = (date) => {
-    setOpenDate(prev => (prev === date ? null : date));
+    setOpenDate((prev) => (prev === date ? null : date));
   };
 
   return (
@@ -51,7 +51,7 @@ const AvailabilityList = ({
 
         return (
           <div key={date} className="availability-list__group">
-            {/* 🗓 En-tête jour cliquable */}
+            {/* Bouton pour afficher les créneaux du jour */}
             <button
               type="button"
               className="availability-list__date"
@@ -59,19 +59,19 @@ const AvailabilityList = ({
               disabled={disabled}
             >
               <span>
-                {new Date(date).toLocaleDateString('fr-FR', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long'
+                {new Date(date).toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long"
                 })}
               </span>
 
               <span className="availability-list__chevron">
-                {isOpen ? '▼' : '▶'}
+                {isOpen ? "▼" : "▶"}
               </span>
             </button>
 
-            {/* ⏰ Créneaux (affichés seulement si ouvert) */}
+            {/* Créneaux affichés uniquement si le jour est ouvert */}
             {isOpen && (
               <div className="availability-list__slots">
                 {slots.map((slot, index) => (

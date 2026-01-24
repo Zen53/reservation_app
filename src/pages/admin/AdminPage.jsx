@@ -20,12 +20,12 @@ export default function AdminPage() {
   useEffect(() => {
     async function loadAdminData() {
       try {
-        // 🔹 Ressources
+        // Récupération de la liste des ressources
         const resourcesRes = await getResources();
         if (resourcesRes.status !== 200) throw new Error();
         setResources(resourcesRes.data);
 
-        // 🔹 Stats admin
+        // Récupération des statistiques globales (admin uniquement)
         const statsRes = await request(
           "http://127.0.0.1:8000/reservations/admin/stats"
         );
@@ -33,7 +33,7 @@ export default function AdminPage() {
           setStats(statsRes.data);
         }
 
-        // 🔹 Toutes les réservations
+        // Récupération de toutes les réservations de tous les utilisateurs
         const allRes = await request(
           "http://127.0.0.1:8000/reservations/admin/all"
         );
@@ -50,6 +50,7 @@ export default function AdminPage() {
     loadAdminData();
   }, []);
 
+  // Activation / désactivation d’une ressource par l’admin
   const handleToggleActive = async (resource) => {
     const newActive = !resource.active;
 
@@ -78,7 +79,7 @@ export default function AdminPage() {
     <div className="page">
       <h1>Dashboard Administrateur</h1>
 
-      {/* ================= STATS ================= */}
+      {/* Affichage des statistiques globales */}
       <section>
         <h2>Statistiques globales</h2>
         <ul>
@@ -87,7 +88,7 @@ export default function AdminPage() {
         </ul>
       </section>
 
-      {/* ================= RESSOURCES ================= */}
+      {/* Gestion de l’activation des ressources */}
       <section>
         <h2>Gestion des ressources</h2>
 
@@ -110,7 +111,7 @@ export default function AdminPage() {
         </ul>
       </section>
 
-      {/* ================= RÉSERVATIONS ================= */}
+      {/* Historique de toutes les réservations */}
       <section>
         <h2>Historique global des réservations</h2>
 

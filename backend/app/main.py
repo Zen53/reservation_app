@@ -6,23 +6,20 @@ from app.auth.routes import router as auth_router
 from app.routes.resources import router as resources_router
 from app.routes.reservations import router as reservations_router
 
+# Création de l'application FastAPI
 app = FastAPI(
     title="Reservation API",
     version="1.0.0"
 )
 
-# =========================
-# 🔐 SECURITY (Swagger)
-# =========================
+# Schéma de sécurité pour Swagger (Bearer Token)
 security = HTTPBearer()
 
-# =========================
-# 🌍 CORS (FRONT + ADMIN)
-# =========================
+# Configuration CORS pour autoriser le frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Front Vite
+        "http://localhost:5173",
     ],
     allow_credentials=True,
     allow_methods=[
@@ -39,16 +36,12 @@ app.add_middleware(
     ],
 )
 
-# =========================
-# ROUTES
-# =========================
+# Déclaration des routes de l'application
 app.include_router(auth_router)
 app.include_router(resources_router)
 app.include_router(reservations_router)
 
-# =========================
-# HEALTHCHECK
-# =========================
+# Route simple pour vérifier que l'API fonctionne
 @app.get("/")
 def root():
     return {"status": "ok"}

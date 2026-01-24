@@ -7,9 +7,7 @@ import './HomePage.css';
 const HomePage = () => {
   const { isAuthenticated, user } = useAuth();
 
-  /* ===================== */
-  /* CAS 1 — NON CONNECTÉ  */
-  /* ===================== */
+  // Cas où l'utilisateur n'est pas connecté
   if (!isAuthenticated) {
     return (
       <div className="page page--home home-welcome">
@@ -17,12 +15,12 @@ const HomePage = () => {
           <h1>Bienvenue 👋</h1>
 
           <p className="welcome-text">
-            Cette application vous permet de réserver facilement des ressources
-            (salles, créneaux horaires, équipements).
+            Cette application permet de réserver facilement des ressources
+            comme des salles ou des créneaux horaires.
           </p>
 
           <p className="welcome-subtext">
-            Connectez-vous pour consulter les disponibilités et effectuer une réservation.
+            Vous devez être connecté pour accéder aux réservations.
           </p>
 
           <Link to="/login" className="home-button primary">
@@ -33,9 +31,7 @@ const HomePage = () => {
     );
   }
 
-  /* ================= */
-  /* CAS 2 — CONNECTÉ */
-  /* ================= */
+  // Cas où l'utilisateur est connecté
   return (
     <div className="page page--home home-welcome">
       <div className="welcome-card">
@@ -48,7 +44,7 @@ const HomePage = () => {
         </p>
 
         <p className="welcome-subtext">
-          Accédez à la liste des ressources pour consulter les disponibilités.
+          Vous pouvez maintenant consulter les ressources disponibles.
         </p>
 
         <Link to="/resources" className="home-button primary">

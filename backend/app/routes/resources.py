@@ -1,24 +1,24 @@
 from fastapi import APIRouter, HTTPException, Depends
+from datetime import date, timedelta, datetime
+
 from app.core.supabase import supabase
 from app.auth.dependencies import get_current_user
-from datetime import date, timedelta, datetime
 
 router = APIRouter(prefix="/resources", tags=["resources"])
 
 
-# =========================
-# GET /resources
-# =========================
 @router.get("/")
 def get_resources(user=Depends(get_current_user)):
+    # Récupération des ressources
+    # Les utilisateurs voient seulement les ressources actives
     try:
         query = supabase.table("resources").select("*")
 
-        # 🔐 USER → seulement actives
         if user.get("role") != "admin":
             query = query.eq("active", True)
 
         return query.execute().data
+
     except Exception:
         raise HTTPException(
             status_code=500,
@@ -26,11 +26,9 @@ def get_resources(user=Depends(get_current_user)):
         )
 
 
-# =========================
-# GET /resources/{id}
-# =========================
 @router.get("/{resource_id}")
 def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
+    # Récupère une ressource par son id
     res = (
         supabase
         .table("resources")
@@ -45,23 +43,20 @@ def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
 
     resource = res[0]
 
-    # 🔐 USER ne peut pas accéder à une ressource inactive
+    # Un utilisateur ne peut pas accéder à une ressource inactive
     if user.get("role") != "admin" and resource.get("active") is False:
         raise HTTPException(status_code=403, detail="Resource disabled")
 
     return resource
 
 
-# =========================
-# PATCH /resources/{id}/active
-# (ADMIN ONLY)
-# =========================
 @router.patch("/{resource_id}/active")
 def toggle_resource_active(
     resource_id: int,
     payload: dict,
     user=Depends(get_current_user)
 ):
+    # Route réservée aux administrateurs
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
@@ -83,11 +78,9 @@ def toggle_resource_active(
     return result[0]
 
 
-# =========================
-# GET /resources/{id}/rules
-# =========================
 @router.get("/{resource_id}/rules")
 def get_resource_rules(resource_id: int):
+    # Retourne les règles horaires d’une ressource
     return (
         supabase
         .table("resource_rules")
@@ -98,11 +91,9 @@ def get_resource_rules(resource_id: int):
     )
 
 
-# =========================
-# GET /resources/{id}/availabilities
-# =========================
 @router.get("/{resource_id}/availabilities")
 def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)):
+    # Génération des créneaux disponibles sur 7 jours
     resource = (
         supabase
         .table("resources")
@@ -115,7 +106,7 @@ def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    # 🔒 AUCUN créneau si inactive
+    # Pas de créneaux si la ressource est désactivée
     if resource[0]["active"] is False:
         return []
 
@@ -161,13 +152,17 @@ def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)
                 datetime.strptime(str(rule["close_time"])[:8], "%H:%M:%S").time()
             )
 
-            slot_duration = timedelta(minutes=int(rule["slot_duration_minutes"]))
+            slot_duration = timedelta(
+                minutes=int(rule["slot_duration_minutes"])
+            )
+
             slot_start = open_time
 
             while slot_start + slot_duration <= close_time:
                 slot_end = slot_start + slot_duration
                 is_reserved = False
 
+                # Vérifie si le créneau est déjà réservé
                 for r in reservations:
                     if r["date"] != slot_start.date().isoformat():
                         continue
@@ -181,7 +176,10 @@ def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)
                         datetime.strptime(str(r["end_time"])[:8], "%H:%M:%S").time()
                     )
 
-                    if not (slot_end <= reserved_start or slot_start >= reserved_end):
+                    if not (
+                        slot_end <= reserved_start
+                        or slot_start >= reserved_end
+                    ):
                         is_reserved = True
                         break
 
