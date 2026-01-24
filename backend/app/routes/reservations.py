@@ -4,37 +4,47 @@ from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
-# ==================================================
-# ================= ADMIN ==========================
-# ==================================================
 
 # ==================================================
-# GET /reservations/admin/stats
+# PARTIE ADMIN
 # ==================================================
+
+# Récupère des statistiques globales
+# Accessible uniquement par un administrateur
 @router.get("/admin/stats")
 def admin_stats(
     user=Depends(get_current_user)
 ):
+    # Vérification du rôle admin
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
-    resources_count = (
-        supabase.table("resources").select("id").execute().data
+    # Récupération du nombre de ressources
+    resources = (
+        supabase
+        .table("resources")
+        .select("id")
+        .execute()
+        .data
     )
 
-    reservations_count = (
-        supabase.table("reservations").select("id").execute().data
+    # Récupération du nombre de réservations
+    reservations = (
+        supabase
+        .table("reservations")
+        .select("id")
+        .execute()
+        .data
     )
 
     return {
-        "resourcesCount": len(resources_count),
-        "reservationsCount": len(reservations_count)
+        "resourcesCount": len(resources),
+        "reservationsCount": len(reservations)
     }
 
 
-# ==================================================
-# GET /reservations/admin/all
-# ==================================================
+# Récupère toutes les réservations (tous utilisateurs)
+# Réservé à l'administrateur
 @router.get("/admin/all")
 def admin_all_reservations(
     user=Depends(get_current_user)
@@ -62,6 +72,7 @@ def admin_all_reservations(
         .data
     )
 
+    # Mise en forme des données pour le frontend
     return [
         {
             "id": r["id"],
@@ -78,17 +89,17 @@ def admin_all_reservations(
 
 
 # ==================================================
-# ================= USER ===========================
+# PARTIE UTILISATEUR
 # ==================================================
 
-# ==================================================
-# POST /reservations
-# ==================================================
+# Création d'une réservation
+# L'utilisateur doit être connecté
 @router.post("/", status_code=201)
 def create_reservation(
     payload: dict,
     user=Depends(get_current_user)
 ):
+    # Vérification des champs obligatoires
     required_fields = ["resourceId", "date", "startTime", "endTime"]
     for field in required_fields:
         if field not in payload:
@@ -99,8 +110,10 @@ def create_reservation(
     start_time = payload["startTime"]
     end_time = payload["endTime"]
 
+    # Identifiant utilisateur récupéré depuis le token
     user_id = user["user_id"]
 
+    # Vérification des conflits de réservation
     conflicts = (
         supabase
         .table("reservations")
@@ -116,6 +129,7 @@ def create_reservation(
     if conflicts:
         raise HTTPException(status_code=409, detail="Time slot already booked")
 
+    # Insertion de la réservation
     result = (
         supabase
         .table("reservations")
@@ -132,9 +146,7 @@ def create_reservation(
     return {"id": result.data[0]["id"]}
 
 
-# ==================================================
-# GET /reservations (MES RÉSERVATIONS)
-# ==================================================
+# Récupère les réservations de l'utilisateur connecté
 @router.get("/")
 def get_my_reservations(
     user=Depends(get_current_user)
@@ -176,9 +188,7 @@ def get_my_reservations(
     ]
 
 
-# ==================================================
-# GET /reservations/{id}
-# ==================================================
+# Récupère une réservation précise (si elle appartient à l'utilisateur)
 @router.get("/{reservation_id}")
 def get_reservation_by_id(
     reservation_id: int,
@@ -223,9 +233,7 @@ def get_reservation_by_id(
     }
 
 
-# ==================================================
-# DELETE /reservations/{id}
-# ==================================================
+# Suppression d'une réservation (propriétaire uniquement)
 @router.delete("/{reservation_id}", status_code=204)
 def delete_reservation(
     reservation_id: int,

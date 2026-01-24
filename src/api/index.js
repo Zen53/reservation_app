@@ -1,24 +1,26 @@
 /**
- * Index des exports API
- * Point d’entrée unique pour tous les appels API
+ * Point d’entrée unique pour tous les appels API du projet.
+ * 
+ * Ce fichier permet de centraliser tous les exports liés aux appels
+ * vers le backend afin de simplifier les imports dans les composants React.
  */
 
 export {
-  // 🔧 CORE
+  // Fonctions de base pour effectuer des requêtes HTTP
   request,
 
-  // 📦 RESOURCES
+  // Fonctions liées aux ressources
   getResources,
   getResourceById,
   getResourceAvailabilities,
   getResourceReservations,
 
-  // 📅 RESERVATIONS (USER)
+  // Fonctions liées aux réservations utilisateur
   getReservations,
   createReservation,
   getReservationById,
   deleteReservation,
 
-  // 🛠 ADMIN
+  // Fonction réservée à l’administrateur
   toggleResourceActive,
 } from "./api";

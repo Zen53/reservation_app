@@ -1,19 +1,30 @@
 const API_URL = "http://127.0.0.1:8000";
 
-/* =========================
-   AUTH HEADER
-========================= */
+/*
+  Récupère le token stocké dans le navigateur
+  et l’ajoute dans le header Authorization si présent
+*/
 const getAuthHeaders = () => {
   const token =
     localStorage.getItem("access_token") ||
     localStorage.getItem("token");
 
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  if (!token) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
 };
 
-/* =========================
-   REQUEST WRAPPER
-========================= */
+/*
+  Fonction générique pour faire des appels API
+  Elle gère :
+  - les headers
+  - le JSON
+  - les erreurs simples
+*/
 export const request = async (url, options = {}) => {
   const headers = {
     ...getAuthHeaders(),
@@ -46,9 +57,10 @@ export const request = async (url, options = {}) => {
   }
 };
 
-/* =========================
-   RESOURCES
-========================= */
+/*
+  ----- RESSOURCES -----
+*/
+
 export const getResources = () =>
   request(`${API_URL}/resources`);
 
@@ -61,9 +73,10 @@ export const getResourceAvailabilities = (id) =>
 export const getResourceReservations = (id) =>
   request(`${API_URL}/resources/${id}/reservations`);
 
-/* =========================
-   RESERVATIONS (USER)
-========================= */
+/*
+  ----- RÉSERVATIONS UTILISATEUR -----
+*/
+
 export const getReservations = () =>
   request(`${API_URL}/reservations`);
 
@@ -81,9 +94,10 @@ export const deleteReservation = (id) =>
     method: "DELETE",
   });
 
-/* =========================
-   ADMIN
-========================= */
+/*
+  ----- ADMIN -----
+*/
+
 export const toggleResourceActive = (resourceId, active) =>
   request(`${API_URL}/resources/${resourceId}/active`, {
     method: "PATCH",

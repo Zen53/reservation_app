@@ -4,39 +4,52 @@ import { useAuth } from "../../auth/useAuth";
 import "./Login.css";
 
 export default function Login() {
+  // Récupération de la fonction login depuis le contexte d’authentification
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Mode de connexion : utilisateur ou admin
   const [mode, setMode] = useState("user");
+
+  // Données du formulaire
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
     admin_code: "",
   });
+
+  // Message d’erreur affiché en cas d’échec
   const [error, setError] = useState(null);
 
+  // Mise à jour des champs du formulaire
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Soumission du formulaire de connexion
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
     try {
+      // Connexion utilisateur classique
       if (mode === "user") {
         await login("user", {
           first_name: form.first_name,
           last_name: form.last_name,
           email: form.email,
         });
-      } else {
+      }
+      // Connexion administrateur avec code
+      else {
         await login("admin", form);
       }
 
+      // Redirection après connexion réussie
       navigate("/");
     } catch {
+      // Message affiché si la connexion échoue
       setError("Erreur de connexion. Vérifiez les informations.");
     }
   };
@@ -48,6 +61,7 @@ export default function Login() {
         Authentification sécurisée par formulaire
       </p>
 
+      {/* Sélecteur de mode utilisateur / admin */}
       <div className="login-switch">
         <button
           className={mode === "user" ? "active" : ""}
@@ -63,6 +77,7 @@ export default function Login() {
         </button>
       </div>
 
+      {/* Formulaire de connexion */}
       <form className="login-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Prénom</label>
@@ -95,6 +110,7 @@ export default function Login() {
           />
         </div>
 
+        {/* Champ supplémentaire visible uniquement en mode admin */}
         {mode === "admin" && (
           <div className="form-group">
             <label>Code ADMIN</label>

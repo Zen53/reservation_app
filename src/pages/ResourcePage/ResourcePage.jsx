@@ -26,15 +26,20 @@ const ResourcePage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // Détermination du mode (création ou modification)
   const mode = searchParams.get('mode');
   const reservationId = searchParams.get('reservationId');
   const isEditMode = mode === 'edit' && reservationId;
 
+  // Données principales
   const [resource, setResource] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
+
+  // États d’affichage
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // États liés à la réservation
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitErrorStatus, setSubmitErrorStatus] = useState(null);
@@ -42,10 +47,11 @@ const ResourcePage = () => {
   useEffect(() => {
     let mounted = true;
 
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
 
+      // Chargement de la ressource
       const resResource = await getResourceById(id);
       if (!mounted) return;
 
@@ -55,6 +61,7 @@ const ResourcePage = () => {
         return;
       }
 
+      // Blocage si la ressource est désactivée
       if (resResource.data.active === false) {
         setError("Cette ressource est désactivée");
         setLoading(false);
@@ -63,9 +70,11 @@ const ResourcePage = () => {
 
       setResource(resResource.data);
 
+      // Chargement des créneaux disponibles
       const resAvail = await getResourceAvailabilities(id);
       let slots = resAvail.status === 200 ? resAvail.data || [] : [];
 
+      // Cas particulier : modification d’une réservation existante
       if (isEditMode) {
         const resReservation = await getReservationById(reservationId);
 
@@ -76,6 +85,7 @@ const ResourcePage = () => {
             endTime: resReservation.data.endTime
           };
 
+          // Ajout du créneau actuel s’il n’est plus disponible
           const exists = slots.some(
             s =>
               s.date === currentSlot.date &&
@@ -95,15 +105,19 @@ const ResourcePage = () => {
       setLoading(false);
     };
 
-    fetch();
-    return () => { mounted = false; };
+    fetchData();
+    return () => {
+      mounted = false;
+    };
   }, [id, isEditMode, reservationId]);
 
+  // Sélection d’un créneau
   const handleSelectSlot = (slot) => {
     setSelectedSlot(slot);
     setSubmitErrorStatus(null);
   };
 
+  // Validation de la réservation
   const handleSubmit = async () => {
     if (!selectedSlot || isSubmitting) return;
 
@@ -124,7 +138,7 @@ const ResourcePage = () => {
     };
 
     try {
-      // ➕ Créer d’abord
+      // Création de la nouvelle réservation
       const resCreate = await createReservation(payload);
 
       if (resCreate.status !== 201) {
@@ -134,7 +148,7 @@ const ResourcePage = () => {
 
       const newReservationId = resCreate.data.id;
 
-      // 🧹 Puis supprimer l’ancienne si édition
+      // Suppression de l’ancienne réservation en cas de modification
       if (isEditMode) {
         await deleteReservation(reservationId);
       }

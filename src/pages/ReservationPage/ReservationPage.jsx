@@ -8,23 +8,29 @@ import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
 import './ReservationPage.css';
 
 const ReservationPage = () => {
+  // Récupération de l'id de la réservation depuis l'URL
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Données de la réservation
   const [reservation, setReservation] = useState(null);
+
+  // États de chargement et d'erreur
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // États liés à l'annulation
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelSuccess, setCancelSuccess] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
+    let mounted = true; // évite les mises à jour après démontage
 
-    const fetch = async () => {
+    const fetchReservation = async () => {
       setLoading(true);
       setError(null);
 
+      // Appel API pour récupérer la réservation
       const res = await getReservationById(id);
       if (!mounted) return;
 
@@ -39,10 +45,15 @@ const ReservationPage = () => {
       setLoading(false);
     };
 
-    fetch();
-    return () => { mounted = false; };
+    fetchReservation();
+
+    // Nettoyage à la destruction du composant
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
+  // Annulation de la réservation
   const handleCancel = async () => {
     if (cancelLoading) return;
 
@@ -54,7 +65,7 @@ const ReservationPage = () => {
     if (res.status === 204) {
       setCancelSuccess(true);
 
-      // ⏱ Redirection après confirmation
+      // Redirection après confirmation visuelle
       setTimeout(() => {
         navigate('/resources');
       }, 1500);
@@ -65,6 +76,7 @@ const ReservationPage = () => {
     setCancelLoading(false);
   };
 
+  // Redirection vers la modification de réservation
   const handleModify = () => {
     navigate(
       `/resources/${reservation.resourceId}?mode=edit&reservationId=${reservation.id}`
@@ -80,20 +92,24 @@ const ReservationPage = () => {
         </p>
       </header>
 
+      {/* Chargement */}
       {loading && <Loader />}
 
+      {/* Erreur */}
       {!loading && error && (
         <ErrorMessage message={error} type="error" />
       )}
 
+      {/* Confirmation d'annulation */}
       {cancelSuccess && (
         <p className="success-message">
-          ✅ La réservation a été annulée avec succès.  
+          ✅ La réservation a été annulée avec succès.
           <br />
           Redirection en cours…
         </p>
       )}
 
+      {/* Détails de la réservation */}
       {!loading && !error && reservation && (
         <div className="reservation-card">
           <h2>Réservation #{reservation.id}</h2>
