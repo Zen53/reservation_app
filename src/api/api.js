@@ -4,7 +4,11 @@ const API_URL = "http://127.0.0.1:8000";
    AUTH HEADER
 ========================= */
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
+  // ✅ PRIORITÉ AU TOKEN BACKEND
+  const token =
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token");
+
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -19,15 +23,22 @@ const request = async (url, options = {}) => {
   };
 
   try {
-    const res = await fetch(url, { ...options, headers });
-    const data = res.status === 204 ? null : await res.json();
+    const res = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    const data =
+      res.status === 204
+        ? null
+        : await res.json().catch(() => null);
 
     return {
       status: res.status,
       data: res.ok ? data : null,
       error: res.ok ? null : data,
     };
-  } catch {
+  } catch (error) {
     return {
       status: 500,
       data: null,
@@ -49,8 +60,7 @@ export const getResourceAvailabilities = (id) =>
   request(`${API_URL}/resources/${id}/availabilities`);
 
 /**
- * ⚠️ CONSERVÉ pour les pages "ressource"
- * (historique / compat)
+ * Historique / compat ressource
  */
 export const getResourceReservations = (id) =>
   request(`${API_URL}/resources/${id}/reservations`);
@@ -60,13 +70,16 @@ export const getResourceReservations = (id) =>
 ========================= */
 
 /**
- * 👉 MES RÉSERVATIONS
- * utilise GET /reservations
- * protégé par token
+ * MES RÉSERVATIONS
+ * GET /reservations (protégé)
  */
 export const getReservations = () =>
   request(`${API_URL}/reservations`);
 
+/**
+ * CRÉER UNE RÉSERVATION
+ * POST /reservations (protégé)
+ */
 export const createReservation = (payload) =>
   request(`${API_URL}/reservations`, {
     method: "POST",
@@ -82,7 +95,7 @@ export const deleteReservation = (id) =>
   });
 
 /* =========================
-   NO-OP (compat admin)
+   NO-OP (admin compat)
 ========================= */
 export const setSimulateServerError = () => {};
 export const toggleResourceActive = () =>

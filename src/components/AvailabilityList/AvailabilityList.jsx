@@ -6,23 +6,23 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage';
  * Composant AvailabilityList
  * Affiche la liste des créneaux disponibles pour une ressource
  */
-const AvailabilityList = ({ 
-  availabilities, 
-  selectedSlot, 
-  onSelectSlot, 
-  disabled 
+const AvailabilityList = ({
+  availabilities,
+  selectedSlot,
+  onSelectSlot,
+  disabled
 }) => {
-  // Cas: liste vide - message selon contrat API
+  // Aucun créneau
   if (!availabilities || availabilities.length === 0) {
     return (
-      <ErrorMessage 
-        message="Aucun créneau disponible pour cette date" 
-        type="info" 
+      <ErrorMessage
+        message="Aucun créneau disponible pour cette période"
+        type="info"
       />
     );
   }
 
-  // Grouper les disponibilités par date
+  // 🔹 Grouper les créneaux par date
   const groupedByDate = availabilities.reduce((acc, slot) => {
     if (!acc[slot.date]) {
       acc[slot.date] = [];
@@ -33,10 +33,21 @@ const AvailabilityList = ({
 
   return (
     <div className="availability-list">
-      <h3 className="availability-list__title">Créneaux disponibles</h3>
-      
+      <h3 className="availability-list__title">
+        Créneaux disponibles
+      </h3>
+
       {Object.entries(groupedByDate).map(([date, slots]) => (
         <div key={date} className="availability-list__group">
+          {/* 🗓 Date visible */}
+          <h4 className="availability-list__date">
+            {new Date(date).toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long'
+            })}
+          </h4>
+
           {slots.map((slot, index) => (
             <AvailabilitySlot
               key={`${slot.date}-${slot.startTime}-${index}`}

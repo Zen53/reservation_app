@@ -23,21 +23,17 @@ def create_reservation(
     start_time = payload["startTime"]
     end_time = payload["endTime"]
 
-    # ✅ USER ID DEPUIS LE TOKEN
     user_id = user["user_id"]
 
-    # 🔎 Vérification des conflits (tous utilisateurs confondus)
+    # 🔎 VÉRIFICATION DE CONFLIT (LOGIQUE CORRECTE)
     conflicts = (
         supabase
         .table("reservations")
         .select("id")
         .eq("resource_id", resource_id)
         .eq("date", date)
-        .or_(
-            f"and(start_time.lte.{start_time},end_time.gt.{start_time}),"
-            f"and(start_time.lt.{end_time},end_time.gte.{end_time}),"
-            f"and(start_time.gte.{start_time},end_time.lte.{end_time})"
-        )
+        .lt("start_time", end_time)
+        .gt("end_time", start_time)
         .execute()
         .data
     )
@@ -45,7 +41,7 @@ def create_reservation(
     if conflicts:
         raise HTTPException(status_code=409, detail="Time slot already booked")
 
-    # ✅ INSERT AVEC user_id
+    # ✅ INSERT
     result = (
         supabase
         .table("reservations")
@@ -63,8 +59,7 @@ def create_reservation(
 
 
 # =========================
-# GET /reservations
-# (MES RÉSERVATIONS)
+# GET /reservations (MES RÉSERVATIONS)
 # =========================
 @router.get("/")
 def get_all_reservations(
