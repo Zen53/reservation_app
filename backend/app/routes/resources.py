@@ -1,11 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import date, timedelta, datetime
-
 from app.core.supabase import supabase
 from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/resources", tags=["resources"])
-
 
 @router.get("/")
 def get_resources(user=Depends(get_current_user)):
@@ -24,7 +22,6 @@ def get_resources(user=Depends(get_current_user)):
             status_code=500,
             detail="Erreur lors de la récupération des ressources"
         )
-
 
 @router.get("/{resource_id}")
 def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
@@ -48,7 +45,6 @@ def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Resource disabled")
 
     return resource
-
 
 @router.patch("/{resource_id}/active")
 def toggle_resource_active(
@@ -77,7 +73,6 @@ def toggle_resource_active(
 
     return result[0]
 
-
 @router.get("/{resource_id}/rules")
 def get_resource_rules(resource_id: int):
     # Retourne les règles horaires d’une ressource
@@ -89,7 +84,6 @@ def get_resource_rules(resource_id: int):
         .execute()
         .data
     )
-
 
 @router.get("/{resource_id}/availabilities")
 def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)):
