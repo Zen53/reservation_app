@@ -4,7 +4,6 @@ from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
-
 # ==================================================
 # PARTIE ADMIN
 # ==================================================
@@ -41,7 +40,6 @@ def admin_stats(
         "resourcesCount": len(resources),
         "reservationsCount": len(reservations)
     }
-
 
 # Récupère toutes les réservations (tous utilisateurs)
 # Réservé à l'administrateur
@@ -86,7 +84,6 @@ def admin_all_reservations(
         }
         for r in data
     ]
-
 
 # ==================================================
 # PARTIE UTILISATEUR
@@ -144,7 +141,6 @@ def create_reservation(
     )
 
     return {"id": result.data[0]["id"]}
-
 
 # Récupère les réservations de l'utilisateur connecté
 @router.get("/")
