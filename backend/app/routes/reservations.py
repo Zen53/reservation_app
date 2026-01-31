@@ -1,58 +1,36 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.supabase import supabase
 from app.auth.dependencies import get_current_user
+from app.services.email_service import send_email
+from app.services.template_service import render_template
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 # ==================================================
-# PARTIE ADMIN
+# ADMIN
 # ==================================================
 
-# Récupère des statistiques globales
-# Accessible uniquement par un administrateur
 @router.get("/admin/stats")
-def admin_stats(
-    user=Depends(get_current_user)
-):
-    # Vérification du rôle admin
+def admin_stats(user=Depends(get_current_user)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
-    # Récupération du nombre de ressources
-    resources = (
-        supabase
-        .table("resources")
-        .select("id")
-        .execute()
-        .data
-    )
-
-    # Récupération du nombre de réservations
-    reservations = (
-        supabase
-        .table("reservations")
-        .select("id")
-        .execute()
-        .data
-    )
+    resources = supabase.table("resources").select("id").execute().data
+    reservations = supabase.table("reservations").select("id").execute().data
 
     return {
         "resourcesCount": len(resources),
         "reservationsCount": len(reservations)
     }
 
-# Récupère toutes les réservations (tous utilisateurs)
-# Réservé à l'administrateur
+
 @router.get("/admin/all")
-def admin_all_reservations(
-    user=Depends(get_current_user)
-):
+def admin_all_reservations(user=Depends(get_current_user)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
     data = (
-        supabase
-        .table("reservations")
+        supabase.table("reservations")
         .select("""
             id,
             resource_id,
@@ -61,16 +39,13 @@ def admin_all_reservations(
             start_time,
             end_time,
             created_at,
-            resources (
-                name
-            )
+            resources ( name )
         """)
         .order("created_at", desc=True)
         .execute()
         .data
     )
 
-    # Mise en forme des données pour le frontend
     return [
         {
             "id": r["id"],
@@ -85,35 +60,30 @@ def admin_all_reservations(
         for r in data
     ]
 
+
 # ==================================================
-# PARTIE UTILISATEUR
+# UTILISATEUR
 # ==================================================
 
-# Création d'une réservation
-# L'utilisateur doit être connecté
 @router.post("/", status_code=201)
-def create_reservation(
-    payload: dict,
-    user=Depends(get_current_user)
-):
-    # Vérification des champs obligatoires
-    required_fields = ["resourceId", "date", "startTime", "endTime"]
-    for field in required_fields:
-        if field not in payload:
+def create_reservation(payload: dict, user=Depends(get_current_user)):
+    required = ["resourceId", "date", "startTime", "endTime"]
+    for f in required:
+        if f not in payload:
             raise HTTPException(status_code=400, detail="Missing required fields")
 
     resource_id = payload["resourceId"]
     date = payload["date"]
     start_time = payload["startTime"]
     end_time = payload["endTime"]
+    previous = payload.get("previousReservation")
 
-    # Identifiant utilisateur récupéré depuis le token
     user_id = user["user_id"]
+    user_email = user["email"]
 
-    # Vérification des conflits de réservation
+    # 🔒 conflits
     conflicts = (
-        supabase
-        .table("reservations")
+        supabase.table("reservations")
         .select("id")
         .eq("resource_id", resource_id)
         .eq("date", date)
@@ -126,10 +96,9 @@ def create_reservation(
     if conflicts:
         raise HTTPException(status_code=409, detail="Time slot already booked")
 
-    # Insertion de la réservation
+    # ➕ insertion
     result = (
-        supabase
-        .table("reservations")
+        supabase.table("reservations")
         .insert({
             "resource_id": resource_id,
             "user_id": user_id,
@@ -140,31 +109,64 @@ def create_reservation(
         .execute()
     )
 
-    return {"id": result.data[0]["id"]}
+    reservation_id = result.data[0]["id"]
 
-# Récupère les réservations de l'utilisateur connecté
+    # 🔎 nom ressource
+    resource = (
+        supabase.table("resources")
+        .select("name")
+        .eq("id", resource_id)
+        .execute()
+        .data[0]
+    )
+
+    # 📧 EMAIL
+    if previous:
+        html = render_template(
+            "reservation_modified.html",
+            {
+                "resource": resource["name"],
+                "old_date": previous["date"],
+                "old_time": f'{previous["startTime"]} - {previous["endTime"]}',
+                "new_date": date,
+                "new_time": f"{start_time} - {end_time}"
+            }
+        )
+        subject = "Modification de votre réservation"
+    else:
+        html = render_template(
+            "reservation_created.html",
+            {
+                "resource": resource["name"],
+                "date": date,
+                "time": f"{start_time} - {end_time}"
+            }
+        )
+        subject = "Confirmation de votre réservation"
+
+    send_email(
+        to=user_email,
+        subject=subject,
+        html=html
+    )
+
+    return {"id": reservation_id}
+
+
 @router.get("/")
-def get_my_reservations(
-    user=Depends(get_current_user)
-):
-    user_id = user["user_id"]
-
+def get_my_reservations(user=Depends(get_current_user)):
     data = (
-        supabase
-        .table("reservations")
+        supabase.table("reservations")
         .select("""
             id,
             resource_id,
-            user_id,
             date,
             start_time,
             end_time,
             created_at,
-            resources (
-                name
-            )
+            resources ( name )
         """)
-        .eq("user_id", user_id)
+        .eq("user_id", user["user_id"])
         .order("created_at", desc=True)
         .execute()
         .data
@@ -184,31 +186,21 @@ def get_my_reservations(
     ]
 
 
-# Récupère une réservation précise (si elle appartient à l'utilisateur)
 @router.get("/{reservation_id}")
-def get_reservation_by_id(
-    reservation_id: int,
-    user=Depends(get_current_user)
-):
-    user_id = user["user_id"]
-
+def get_reservation_by_id(reservation_id: int, user=Depends(get_current_user)):
     data = (
-        supabase
-        .table("reservations")
+        supabase.table("reservations")
         .select("""
             id,
             resource_id,
-            user_id,
             date,
             start_time,
             end_time,
             created_at,
-            resources (
-                name
-            )
+            resources ( name )
         """)
         .eq("id", reservation_id)
-        .eq("user_id", user_id)
+        .eq("user_id", user["user_id"])
         .execute()
         .data
     )
@@ -229,23 +221,31 @@ def get_reservation_by_id(
     }
 
 
-# Suppression d'une réservation (propriétaire uniquement)
 @router.delete("/{reservation_id}", status_code=204)
-def delete_reservation(
-    reservation_id: int,
-    user=Depends(get_current_user)
-):
-    user_id = user["user_id"]
-
+def delete_reservation(reservation_id: int, user=Depends(get_current_user)):
     data = (
-        supabase
-        .table("reservations")
+        supabase.table("reservations")
         .delete()
         .eq("id", reservation_id)
-        .eq("user_id", user_id)
+        .eq("user_id", user["user_id"])
         .execute()
         .data
     )
 
     if not data:
         raise HTTPException(status_code=404, detail="Reservation not found")
+
+    html = render_template(
+        "reservation_cancelled.html",
+        {
+            "reservation_id": reservation_id
+        }
+    )
+
+    send_email(
+        to=user["email"],
+        subject="Annulation de votre réservation",
+        html=html
+    )
+
+    return None
