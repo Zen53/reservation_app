@@ -118,48 +118,50 @@ const ResourcePage = () => {
   };
 
   // Validation de la réservation
-  const handleSubmit = async () => {
-    if (!selectedSlot || isSubmitting) return;
+const handleSubmit = async () => {
+  if (!selectedSlot || isSubmitting) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
+  setIsSubmitting(true);
+  setSubmitErrorStatus(null);
+
+  const payload = {
+    resourceId: parseInt(id, 10),
+    date: selectedSlot.date,
+    startTime: selectedSlot.startTime,
+    endTime: selectedSlot.endTime,
+  };
+
+  // ✏️ Cas modification
+  if (isEditMode) {
+    payload.previousReservation = {
+      id: reservationId,
+      date: selectedSlot.date,
+      startTime: selectedSlot.startTime,
+      endTime: selectedSlot.endTime,
+    };
+  }
+
+  try {
+    const resCreate = await createReservation(payload);
+
+    if (resCreate.status !== 201) {
+      setSubmitErrorStatus(resCreate.status);
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitErrorStatus(null);
+    const newReservationId = resCreate.data.id;
 
-    const payload = {
-      resourceId: parseInt(id, 10),
-      date: selectedSlot.date,
-      startTime: selectedSlot.startTime,
-      endTime: selectedSlot.endTime
-    };
-
-    try {
-      // Création de la nouvelle réservation
-      const resCreate = await createReservation(payload);
-
-      if (resCreate.status !== 201) {
-        setSubmitErrorStatus(resCreate.status);
-        return;
-      }
-
-      const newReservationId = resCreate.data.id;
-
-      // Suppression de l’ancienne réservation en cas de modification
-      if (isEditMode) {
-        await deleteReservation(reservationId);
-      }
-
-      navigate(`/reservations/${newReservationId}`);
-    } catch {
-      setSubmitErrorStatus(500);
-    } finally {
-      setIsSubmitting(false);
+    if (isEditMode) {
+      await deleteReservation(reservationId);
     }
-  };
+
+    navigate(`/reservations/${newReservationId}?success=${isEditMode ? "modified" : "created"}`);
+  } catch {
+    setSubmitErrorStatus(500);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="page page--resource">

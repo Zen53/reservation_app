@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import {
+  useParams,
+  Link,
+  useNavigate,
+  useSearchParams
+} from 'react-router-dom';
+
 import { getReservationById, deleteReservation } from '../../api';
 
 import Loader from '../../components/Loader/Loader';
@@ -8,37 +14,39 @@ import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
 import './ReservationPage.css';
 
 const ReservationPage = () => {
-  // Récupération de l'id de la réservation depuis l'URL
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // Données de la réservation
+  // Paramètre de succès (?success=created|modified)
+  const success = searchParams.get('success');
+
+  // Données réservation
   const [reservation, setReservation] = useState(null);
 
-  // États de chargement et d'erreur
+  // États généraux
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // États liés à l'annulation
+  // États annulation
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelSuccess, setCancelSuccess] = useState(false);
 
   useEffect(() => {
-    let mounted = true; // évite les mises à jour après démontage
+    let mounted = true;
 
     const fetchReservation = async () => {
       setLoading(true);
       setError(null);
 
-      // Appel API pour récupérer la réservation
       const res = await getReservationById(id);
       if (!mounted) return;
 
       if (res.status === 404) {
         setError('Réservation inexistante');
-      } else if (res.status === 500) {
+      } else if (res.status !== 200) {
         setError('Une erreur est survenue, veuillez réessayer plus tard');
-      } else if (res.status === 200) {
+      } else {
         setReservation(res.data);
       }
 
@@ -46,14 +54,12 @@ const ReservationPage = () => {
     };
 
     fetchReservation();
-
-    // Nettoyage à la destruction du composant
     return () => {
       mounted = false;
     };
   }, [id]);
 
-  // Annulation de la réservation
+  // Annulation
   const handleCancel = async () => {
     if (cancelLoading) return;
 
@@ -64,8 +70,6 @@ const ReservationPage = () => {
 
     if (res.status === 204) {
       setCancelSuccess(true);
-
-      // Redirection après confirmation visuelle
       setTimeout(() => {
         navigate('/resources');
       }, 1500);
@@ -76,7 +80,7 @@ const ReservationPage = () => {
     setCancelLoading(false);
   };
 
-  // Redirection vers la modification de réservation
+  // Modification
   const handleModify = () => {
     navigate(
       `/resources/${reservation.resourceId}?mode=edit&reservationId=${reservation.id}`
@@ -92,6 +96,27 @@ const ReservationPage = () => {
         </p>
       </header>
 
+      {/* Messages de succès */}
+      {success === 'created' && (
+        <p className="success-message">
+          ✅ Votre réservation a bien été créée.
+        </p>
+      )}
+
+      {success === 'modified' && (
+        <p className="success-message">
+          ✏️ Votre réservation a bien été modifiée.
+        </p>
+      )}
+
+      {cancelSuccess && (
+        <p className="success-message">
+          ❌ Votre réservation a bien été annulée.
+          <br />
+          Redirection en cours…
+        </p>
+      )}
+
       {/* Chargement */}
       {loading && <Loader />}
 
@@ -100,16 +125,7 @@ const ReservationPage = () => {
         <ErrorMessage message={error} type="error" />
       )}
 
-      {/* Confirmation d'annulation */}
-      {cancelSuccess && (
-        <p className="success-message">
-          ✅ La réservation a été annulée avec succès.
-          <br />
-          Redirection en cours…
-        </p>
-      )}
-
-      {/* Détails de la réservation */}
+      {/* Détails */}
       {!loading && !error && reservation && (
         <div className="reservation-card">
           <h2>Réservation #{reservation.id}</h2>
