@@ -6,9 +6,6 @@ import logging
 
 
 def send_reminders():
-    """
-    Envoie les rappels J-1 et H-1
-    """
     now = datetime.now()
 
     reservations = (
@@ -16,9 +13,9 @@ def send_reminders():
         .table("reservations")
         .select("""
             id,
-            user_id,
             date,
             start_time,
+            users(email),
             resources(name)
         """)
         .execute()
@@ -35,7 +32,7 @@ def send_reminders():
         # Rappel J-1
         if timedelta(hours=23) <= delta <= timedelta(hours=25):
             send_email(
-                to=r["user_id"],
+                to=r["users"]["email"],
                 subject="Rappel : votre réservation est demain",
                 html=render_template(
                     "reservation_reminder_j1.html",
@@ -51,7 +48,7 @@ def send_reminders():
         # Rappel H-1
         if timedelta(minutes=55) <= delta <= timedelta(minutes=65):
             send_email(
-                to=r["user_id"],
+                to=r["users"]["email"],
                 subject="Rappel : votre réservation commence bientôt",
                 html=render_template(
                     "reservation_reminder_h1.html",

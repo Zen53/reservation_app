@@ -157,3 +157,36 @@ npm run dev
 - Créneaux calculés dynamiquement à partir des règles horaires
 - Détection des conflits côté backend
 - Séparation stricte des rôles user / admin
+
+
+## Partie Emails
+
+# Notifications email (Resend)
+
+- Envoi d’emails côté backend via Resend avec domaine configuré
+- Emails envoyés lors de la création, annulation et modification d’une réservation
+- Rappels automatiques de réservation J-1 (24h avant) et H-1 (1h avant)
+
+# Templates HTML dédiés pour chaque type d’email
+
+- Logique email séparée de la logique métier
+- Tester les emails en local
+- Créer un compte Resend et générer une clé API
+
+# Renseigner les variables suivantes dans le .env du backend :
+
+RESEND_API_KEY
+EMAIL_FROM
+ADMIN_EMAIL
+ENV=development ou production
+
+# Lancer le backend normalement
+
+Créer / modifier / annuler une réservation depuis l’interface pour déclencher les emails
+
+# Rappels par email
+
+Des emails automatiques sont envoyés 24h (J-1) et 1h (H-1) avant chaque réservation.
+Les rappels sont gérés par une tâche planifiée côté backend.
+Les réservations créées via l’application déclenchent automatiquement les rappels.
+Pour tester, il suffit de créer une réservation proche et de lancer le script de rappels.
