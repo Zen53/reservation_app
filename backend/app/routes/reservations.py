@@ -60,7 +60,6 @@ def admin_all_reservations(user=Depends(get_current_user)):
         for r in data
     ]
 
-
 # ==================================================
 # UTILISATEUR
 # ==================================================
@@ -81,7 +80,7 @@ def create_reservation(payload: dict, user=Depends(get_current_user)):
     user_id = user["user_id"]
     user_email = user["email"]
 
-    # 🔒 conflits
+    # 🔒 Vérification des conflits
     conflicts = (
         supabase.table("reservations")
         .select("id")
@@ -96,7 +95,7 @@ def create_reservation(payload: dict, user=Depends(get_current_user)):
     if conflicts:
         raise HTTPException(status_code=409, detail="Time slot already booked")
 
-    # ➕ insertion
+    # ➕ Création de la réservation
     result = (
         supabase.table("reservations")
         .insert({
@@ -111,7 +110,7 @@ def create_reservation(payload: dict, user=Depends(get_current_user)):
 
     reservation_id = result.data[0]["id"]
 
-    # 🔎 nom ressource
+    # 🔎 Récupération du nom de la ressource
     resource = (
         supabase.table("resources")
         .select("name")
@@ -120,26 +119,32 @@ def create_reservation(payload: dict, user=Depends(get_current_user)):
         .data[0]
     )
 
-    # 📧 EMAIL
+    # ==================================================
+    # 📧 EMAIL — logique corrigée
+    # ==================================================
+
     if previous:
+        # ✏️ MODIFICATION → UN SEUL EMAIL
         html = render_template(
             "reservation_modified.html",
             {
                 "resource": resource["name"],
                 "old_date": previous["date"],
-                "old_time": f'{previous["startTime"]} - {previous["endTime"]}',
+                "old_time": f"{previous['startTime']} – {previous['endTime']}",
                 "new_date": date,
-                "new_time": f"{start_time} - {end_time}"
+                "new_time": f"{start_time} – {end_time}",
             }
         )
         subject = "Modification de votre réservation"
+
     else:
+        # ➕ CRÉATION
         html = render_template(
             "reservation_created.html",
             {
                 "resource": resource["name"],
                 "date": date,
-                "time": f"{start_time} - {end_time}"
+                "time": f"{start_time} – {end_time}",
             }
         )
         subject = "Confirmation de votre réservation"
@@ -235,10 +240,14 @@ def delete_reservation(reservation_id: int, user=Depends(get_current_user)):
     if not data:
         raise HTTPException(status_code=404, detail="Reservation not found")
 
+    r = data[0]
+
     html = render_template(
         "reservation_cancelled.html",
         {
-            "reservation_id": reservation_id
+            "resource": r.get("resource_id", ""),
+            "date": r.get("date", ""),
+            "time": f"{r.get('start_time', '')} – {r.get('end_time', '')}",
         }
     )
 
