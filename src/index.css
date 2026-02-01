@@ -1,62 +1,163 @@
 :root {
-  --bg: #f1f5f9;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --primary: #3b82f6;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  line-height: 1.45;
+  /* ===== BRAND COLORS ===== */
+  --primary: 45 80% 52%;          /* doré */
+  --primary-hover: 45 85% 45%;    /* doré plus foncé */
+  --accent: 45 90% 60%;
+
+  /* ===== BACKGROUNDS ===== */
+  --bg: 0 0% 98%;
+  --bg-gradient-start: 0 0% 100%;
+  --bg-gradient-end: 0 0% 94%;
+
+  --card: 0 0% 100%;
+  --card-hover: 0 0% 97%;
+  --border: 0 0% 85%;
+
+  /* ===== TEXT ===== */
+  --text: 0 0% 8%;
+  --text-secondary: 0 0% 28%;
+  --text-muted: 0 0% 45%;
+
+  /* ===== FEEDBACK ===== */
+  --success: 145 60% 38%;
+  --success-bg: 145 40% 92%;
+  --error: 0 80% 55%;
+  --error-bg: 0 80% 94%;
+
+  /* ===== EFFECTS ===== */
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
+  --shadow-md: 0 8px 20px rgba(0,0,0,0.12);
+  --shadow-lg: 0 18px 40px rgba(0,0,0,0.18);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  /* ===== TYPO ===== */
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+  line-height: 1.5;
 }
 
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
+/* ===== DARK MODE ===== */
+.dark {
+  --bg: 0 0% 5%;
+  --bg-gradient-start: 0 0% 4%;
+  --bg-gradient-end: 0 0% 9%;
+
+  --card: 0 0% 10%;
+  --card-hover: 0 0% 13%;
+  --border: 0 0% 22%;
+
+  --text: 0 0% 96%;
+  --text-secondary: 0 0% 70%;
+  --text-muted: 0 0% 50%;
+
+  --primary: 45 85% 58%;
+  --primary-hover: 45 90% 65%;
+
+  --success-bg: 145 40% 14%;
+  --error-bg: 0 50% 14%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: var(--font, Inter), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--font-sans);
+  background: linear-gradient(
+    145deg,
+    hsl(var(--bg-gradient-start)),
+    hsl(var(--bg-gradient-end))
+  );
+  color: hsl(var(--text));
+  transition: background 0.3s ease, color 0.2s ease;
 }
 
-a { color: var(--primary); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-button { font-family: inherit; }
-
-.app-nav {
-  background: var(--card);
-  border-bottom: 1px solid #e6eef6;
-  padding: 0.6rem 1rem;
+a {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  font-weight: 600;
 }
-.app-nav__inner { max-width: 1000px; margin: 0 auto; }
-.app-logo { font-weight: 700; color: var(--primary); text-decoration: none; font-size: 1.05rem; }
 
-.app-main { padding: 1.5rem; min-height: calc(100vh - 72px); }
+a:hover {
+  text-decoration: underline;
+}
 
-.page { max-width: 1000px; margin: 0 auto; }
+button {
+  font-family: inherit;
+}
 
-.loader-container, .resource-list { max-width: 1000px; margin: 0 auto; }
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+  animation: fadeUp 0.4s ease forwards;
+}
+
+.page__header {
+  margin-bottom: 2rem;
+}
+
+.page__subtitle {
+  color: hsl(var(--text-muted));
+  font-size: 1.05rem;
+}
+
+.app-main {
+  min-height: calc(100vh - 80px);
+}
 
 .empty-state {
-  margin: 2rem 0;
+  margin: 3rem auto;
   text-align: center;
-  color: #666;
-  font-style: italic;
+  padding: 3rem 2rem;
+  background: hsl(var(--card));
+  border-radius: var(--radius-lg);
+  border: 2px dashed hsl(var(--border));
+  color: hsl(var(--text-muted));
+  animation: fadeUp 0.4s ease forwards;
 }
 
-/* ===== Micro animations ===== */
+.success-message {
+  padding: 1rem 1.25rem;
+  background: hsl(var(--success-bg));
+  border-left: 5px solid hsl(var(--success));
+  border-radius: var(--radius-md);
+  color: hsl(var(--success));
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  padding: 1rem 1.25rem;
+  background: hsl(var(--error-bg));
+  border-left: 5px solid hsl(var(--error));
+  border-radius: var(--radius-md);
+  color: hsl(var(--error));
+  font-weight: 700;
+}
 
 .fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeUp 0.3s ease forwards;
 }
 
-@keyframes fadeIn {
+@keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-

@@ -1,39 +1,90 @@
+/* ===== Availability Slot ===== */
 .availability-slot {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
   padding: 1rem 1.25rem;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  background: hsl(var(--card));
+  border: 2px solid hsl(var(--border));
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   text-align: left;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Hover state */
 .availability-slot:hover:not(:disabled) {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.04);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
+/* Selection indicator bar */
+.availability-slot::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+/* Selected state */
 .availability-slot--selected {
-  border-color: #3b82f6;
-  background: #dbeafe;
+  border-color: hsl(var(--primary));
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.04));
+  box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.2);
 }
 
+.availability-slot--selected::before {
+  background: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--accent)));
+}
+
+/* Disabled state */
 .availability-slot:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
+/* Date text */
 .availability-slot__date {
   font-size: 0.85rem;
-  color: #64748b;
+  color: hsl(var(--text-muted));
   text-transform: capitalize;
+  font-weight: 500;
 }
 
+/* Time text */
 .availability-slot__time {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: hsl(var(--text));
+  transition: color var(--transition-fast);
+}
+
+.availability-slot--selected .availability-slot__time {
+  color: hsl(var(--primary));
+}
+
+/* Pulse animation for selected */
+.availability-slot--selected {
+  animation: slotPulse 0.3s ease-out;
+}
+
+@keyframes slotPulse {
+  0% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
 }

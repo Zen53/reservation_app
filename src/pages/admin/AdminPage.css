@@ -1,78 +1,137 @@
 /* ===== Admin Page ===== */
-
 .page section {
-    margin-bottom: 2rem;
-  }
-  
-  /* Espacement entre les lignes de ressources */
-  .page section ul li {
-    margin-bottom: 0.75rem;
-  }
-  
-  /* Zone texte à largeur fixe pour aligner les boutons */
-  .resource-label {
-    display: inline-block;
-    width: 260px; /* ajuste si besoin */
-  }
-  
-  /* ===== Boutons admin ===== */
-  .page button {
-    margin-left: 0.75rem;
-    padding: 0.25rem 0.7rem;
-    border-radius: 6px;
-    border: none;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-  }
-  
-  /* Bouton Activer (ressource inactive) → GRIS */
-  .page .btn-activate {
-    background-color: #cecece;
-    color: #333333;
-  }
-  
-  .page .btn-activate:hover {
-    background-color: #bdbdbd;
-  }
-  
-  /* Bouton Désactiver (ressource active) → VERT */
-  .page .btn-desactivate {
-    background-color: #3a9d23;
-    color: #ffffff;
-  }
-  
-  .page .btn-desactivate:hover {
-    background-color: #31851d;
-  }
-  
-  /* ===== Tableau des réservations ===== */
-  .page table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
-  }
-  
-  .page thead th {
-    text-align: left;
-    padding: 0.75rem 1rem;
-    border-bottom: 2px solid #dddddd;
-  }
-  
-  .page tbody td {
-    padding: 0.75rem 1rem;
-    background-color: #f9f9f9;
-  }
-  
-  /* Arrondir les lignes du tableau */
-  .page tbody tr td:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-  }
-  
-  .page tbody tr td:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    line-height: 1.4;
-    white-space: pre-line;
-  }
+  margin-bottom: 2.5rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.page section h2 {
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--text));
+}
+
+/* ===== Resource List ===== */
+.page section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.page section ul li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  background: hsl(var(--bg));
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.page section ul li:hover {
+  background: hsl(var(--primary) / 0.04);
+}
+
+.resource-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  color: hsl(var(--text));
+  min-width: 200px;
+}
+
+/* ===== Admin Buttons ===== */
+.page button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+/* Activate button (inactive resource) */
+.page .btn-activate {
+  background: hsl(var(--bg));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--text-secondary));
+}
+
+.page .btn-activate:hover {
+  background: hsl(var(--success-bg));
+  border-color: hsl(var(--success) / 0.3);
+  color: hsl(var(--success));
+}
+
+/* Deactivate button (active resource) */
+.page .btn-desactivate {
+  background: linear-gradient(135deg, hsl(var(--success)), hsl(160 84% 35%));
+  color: white;
+}
+
+.page .btn-desactivate:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--success) / 0.3);
+}
+
+/* ===== Reservation Table ===== */
+.page table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1rem;
+}
+
+.page thead th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.04));
+  color: hsl(var(--text));
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid hsl(var(--border));
+}
+
+.page thead th:first-child {
+  border-top-left-radius: var(--radius-md);
+}
+
+.page thead th:last-child {
+  border-top-right-radius: var(--radius-md);
+}
+
+.page tbody td {
+  padding: 1rem 1.25rem;
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--text-secondary));
+  transition: background var(--transition-fast);
+}
+
+.page tbody tr:hover td {
+  background: hsl(var(--primary) / 0.04);
+}
+
+.page tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.page tbody tr td:first-child {
+  border-bottom-left-radius: var(--radius-md);
+}
+
+.page tbody tr td:last-child {
+  border-bottom-right-radius: var(--radius-md);
+  line-height: 1.5;
+  white-space: pre-line;
+}

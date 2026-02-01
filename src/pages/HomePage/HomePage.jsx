@@ -36,7 +36,7 @@ const HomePage = () => {
     <div className="page page--home home-welcome">
       <div className="welcome-card">
         <h1>
-          Bon retour{user?.first_name ? `, ${user.first_name}` : ''} 👋
+          Bon retour{user?.first_name ? `, ${user.first_name}` : ''} 
         </h1>
 
         <p className="welcome-text">

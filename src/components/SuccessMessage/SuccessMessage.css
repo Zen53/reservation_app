@@ -1,36 +1,76 @@
+/* ===== Success Message ===== */
 .success-message {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.875rem;
   padding: 1rem 1.25rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin: 1rem 0;
   font-size: 0.95rem;
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #16a34a;
+  font-weight: 500;
+  background: linear-gradient(135deg, hsl(var(--success-bg)), hsl(160 70% 92%));
+  border: 1px solid hsl(var(--success) / 0.25);
+  color: hsl(var(--success));
+  animation: successSlide 0.4s ease-out;
 }
 
+@keyframes successSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Icon */
 .success-icon {
   font-size: 1.25rem;
+  flex-shrink: 0;
+  animation: successPop 0.5s ease-out 0.2s backwards;
 }
 
+@keyframes successPop {
+  from {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Text */
 .success-text {
   flex: 1;
+  line-height: 1.5;
 }
 
+/* Close button */
 .success-close {
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #16a34a;
+  color: hsl(var(--success));
   padding: 0;
   line-height: 1;
-  opacity: 0.7;
-  transition: opacity 0.2s;
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .success-close:hover {
   opacity: 1;
+  background: hsl(var(--success) / 0.15);
+  transform: scale(1.1);
 }
