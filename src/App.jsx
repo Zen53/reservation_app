@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/routing/ProtectedRoute";
-
+import Profile from "./pages/auth/Profile";
 import Login from "./pages/auth/Login";
 import Unauthorized from "./pages/auth/Unauthorized";
 import NotFound from "./pages/auth/NotFound";
@@ -73,6 +73,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/profile" element={<Profile />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />

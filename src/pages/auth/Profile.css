@@ -1,0 +1,129 @@
+.profile-page {
+  min-height: 80vh;
+  padding: 48px 16px;
+  background: #f4f6f8;
+}
+
+.profile-container {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.profile-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 36px;
+  color: #1f2933;
+}
+
+/* Infos utilisateur */
+.profile-card {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.profile-card p {
+  margin: 12px 0;
+  font-size: 1.05rem;
+  color: #374151;
+}
+
+.profile-card strong {
+  display: inline-block;
+  width: 80px;
+  color: #111827;
+}
+
+/* Séparateur */
+.profile-separator {
+  height: 1px;
+  margin: 36px 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #cbd5e1,
+    transparent
+  );
+}
+
+/* Zone dangereuse */
+.profile-danger {
+  background: #fff5f5;
+  border: 1px solid #f1bcbc;
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.profile-danger h3 {
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c0392b;
+}
+
+.profile-danger p {
+  margin-bottom: 20px;
+  color: #7f1d1d;
+}
+
+/* Bouton */
+.delete-account-button {
+  background: #c0392b;
+  color: #ffffff;
+  border: none;
+  padding: 14px 26px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delete-account-button:hover {
+  background: #a93226;
+}
+
+.delete-account-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dark .profile-container {
+  background: #ffffff; /* on garde la carte claire */
+}
+
+.dark .profile-title {
+  color: #0f172a; /* TITRE BIEN LISIBLE */
+}
+
+.dark .profile-card {
+  background: #ffffff;
+  border-color: #475569;
+}
+
+.dark .profile-card p {
+  color: #1e293b; /* TEXTE PRINCIPAL */
+}
+
+.dark .profile-card strong {
+  color: #020617; /* LABELS */
+}
+
+.dark .profile-danger {
+  background: #fff1f2;
+  border-color: #fca5a5;
+}
+
+.dark .profile-danger h3 {
+  color: #991b1b; /* TITRE DANGER */
+}
+
+.dark .profile-danger p {
+  color: #7f1d1d; /* TEXTE DANGER */
+}

@@ -41,7 +41,7 @@ export default function AuthProvider({ children }) {
     setToken(data.access_token);
     setUser(data.user);
 
-    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("user", JSON.stringify(data.user));
   };
 
