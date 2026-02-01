@@ -1,30 +1,22 @@
 :root {
-  /* ===== BRAND COLORS ===== */
   --primary: 45 80% 52%;          /* doré */
-  --primary-hover: 45 85% 45%;    /* doré plus foncé */
-  --accent: 45 90% 60%;
+  --primary-hover: 45 85% 45%;
+  --accent: 45 80% 52%;
 
-  /* ===== BACKGROUNDS ===== */
   --bg: 0 0% 98%;
-  --bg-gradient-start: 0 0% 100%;
-  --bg-gradient-end: 0 0% 94%;
-
   --card: 0 0% 100%;
   --card-hover: 0 0% 97%;
   --border: 0 0% 85%;
 
-  /* ===== TEXT ===== */
-  --text: 0 0% 8%;
-  --text-secondary: 0 0% 28%;
-  --text-muted: 0 0% 45%;
+  --text: 220 15% 15%;            /* noir doux */
+  --text-secondary: 220 10% 35%;
+  --text-muted: 220 8% 55%;
 
-  /* ===== FEEDBACK ===== */
   --success: 145 60% 38%;
   --success-bg: 145 40% 92%;
   --error: 0 80% 55%;
   --error-bg: 0 80% 94%;
 
-  /* ===== EFFECTS ===== */
   --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
   --shadow-md: 0 8px 20px rgba(0,0,0,0.12);
   --shadow-lg: 0 18px 40px rgba(0,0,0,0.18);
@@ -33,29 +25,26 @@
   --radius-md: 12px;
   --radius-lg: 18px;
 
-  /* ===== TYPO ===== */
+  --transition-fast: 0.2s ease;
   --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial;
 
   line-height: 1.5;
 }
 
-/* ===== DARK MODE ===== */
 .dark {
-  --bg: 0 0% 5%;
-  --bg-gradient-start: 0 0% 4%;
-  --bg-gradient-end: 0 0% 9%;
-
-  --card: 0 0% 10%;
-  --card-hover: 0 0% 13%;
+  --bg: 0 0% 6%;
+  --card: 0 0% 12%;
+  --card-hover: 0 0% 15%;
   --border: 0 0% 22%;
 
   --text: 0 0% 96%;
   --text-secondary: 0 0% 70%;
   --text-muted: 0 0% 50%;
 
-  --primary: 45 85% 58%;
-  --primary-hover: 45 90% 65%;
+  --primary: 45 80% 58%;
+  --primary-hover: 45 85% 65%;
+  --accent: 45 80% 58%;
 
   --success-bg: 145 40% 14%;
   --error-bg: 0 50% 14%;
@@ -67,26 +56,38 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: linear-gradient(
-    145deg,
-    hsl(var(--bg-gradient-start)),
-    hsl(var(--bg-gradient-end))
-  );
+  background: hsl(var(--bg));
   color: hsl(var(--text));
   transition: background 0.3s ease, color 0.2s ease;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: hsl(var(--text));
+  margin: 0;
+}
+
+p {
+  color: hsl(var(--text-secondary));
+}
+
 a {
   color: hsl(var(--primary));
-  text-decoration: none;
   font-weight: 600;
+  text-decoration: none;
 }
 
 a:hover {
@@ -101,7 +102,7 @@ button {
   max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1.25rem;
-  animation: fadeUp 0.4s ease forwards;
+  animation: fadeUp 0.35s ease forwards;
 }
 
 .page__header {
@@ -125,7 +126,6 @@ button {
   border-radius: var(--radius-lg);
   border: 2px dashed hsl(var(--border));
   color: hsl(var(--text-muted));
-  animation: fadeUp 0.4s ease forwards;
 }
 
 .success-message {
@@ -154,7 +154,7 @@ button {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;

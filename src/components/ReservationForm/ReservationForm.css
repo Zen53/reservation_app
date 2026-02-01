@@ -1,135 +1,92 @@
 /* ===== Reservation Form ===== */
 .reservation-form {
   background: hsl(var(--card));
-  border: 1px solid hsl(var(--card-border));
+  border: 1px solid hsl(var(--border));
   border-radius: var(--radius-lg);
-  padding: 1.75rem;
+  padding: 2rem;
   box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Accent bar */
-.reservation-form::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--primary)));
-}
-
-/* Empty state */
-.reservation-form--empty {
-  text-align: center;
-  color: hsl(var(--text-muted));
-  background: hsl(var(--bg));
-  border: 2px dashed hsl(var(--border));
-  padding: 2.5rem 1.5rem;
-}
-
-.reservation-form--empty::before {
-  display: none;
-}
-
-.reservation-form--empty p {
-  margin: 0;
-  font-style: italic;
 }
 
 /* ===== Title ===== */
 .reservation-form__title {
   margin: 0 0 1.25rem 0;
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: hsl(var(--text));
 }
 
-/* ===== Info Message ===== */
-.reservation-form__info {
-  margin: 0 0 1rem 0;
-  padding: 0.75rem 1rem;
-  background: hsl(var(--warning-bg));
-  border: 1px solid hsl(var(--warning) / 0.2);
-  border-radius: var(--radius-sm);
-  color: hsl(var(--warning));
-  font-size: 0.875rem;
+/* ===== Image ===== */
+.reservation-form__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
 }
 
-/* ===== Summary Box ===== */
+/* ===== Empty ===== */
+.reservation-form--empty {
+  padding: 2.5rem;
+  border: 2px dashed hsl(var(--border));
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: hsl(var(--text-muted));
+}
+
+/* ===== Info ===== */
+.reservation-form__info {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: hsl(var(--warning-bg));
+  border-radius: var(--radius-sm);
+  color: hsl(var(--warning));
+  font-size: 0.9rem;
+}
+
+/* ===== Summary ===== */
 .reservation-form__summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-  padding: 1.25rem;
-  background: linear-gradient(135deg, hsl(var(--bg)), hsl(var(--primary) / 0.02));
+  background: hsl(var(--bg));
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius-md);
+  padding: 1.25rem;
   margin-bottom: 1.5rem;
 }
 
 .reservation-form__row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.reservation-form__label {
+.reservation-form__row span {
   color: hsl(var(--text-muted));
-  font-size: 0.9rem;
-  font-weight: 500;
 }
 
-.reservation-form__value {
-  font-weight: 600;
+.reservation-form__row strong {
   color: hsl(var(--text));
-  text-transform: capitalize;
-  text-align: right;
+  font-weight: 600;
 }
 
-/* ===== Submit Button ===== */
+/* ===== Button ===== */
 .reservation-form__button {
   width: 100%;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(245 87% 55%));
+  padding: 1rem;
+  background: hsl(var(--primary));
   color: white;
   border: none;
   border-radius: var(--radius-md);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-}
-
-.reservation-form__button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .reservation-form__button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), 0 8px 24px hsl(var(--primary) / 0.35);
-}
-
-.reservation-form__button:hover:not(:disabled)::before {
-  opacity: 1;
-}
-
-.reservation-form__button:active:not(:disabled) {
-  transform: translateY(0);
+  box-shadow: 0 8px 20px hsl(var(--primary) / 0.35);
 }
 
 .reservation-form__button:disabled {
   background: hsl(var(--text-muted));
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }

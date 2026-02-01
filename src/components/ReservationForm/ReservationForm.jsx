@@ -1,10 +1,9 @@
-import './ReservationForm.css';
-import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import "./ReservationForm.css";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { resourceImages } from "../../utils/resourceImages";
 
 /*
-  Formulaire de confirmation d’une réservation.
-  Il affiche un récapitulatif du créneau sélectionné
-  et permet de valider la réservation.
+  Formulaire de confirmation / modification d’une réservation.
 */
 const ReservationForm = ({
   resource,
@@ -12,29 +11,19 @@ const ReservationForm = ({
   onSubmit,
   isSubmitting,
   error,
-  isEdit = false
+  isEdit = false,
 }) => {
-
-  /*
-    Met en forme une date pour l’affichage
-    (format lisible en français)
-  */
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+  const formatDate = (dateStr) =>
+    new Date(dateStr).toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
-  };
 
-  /*
-    Associe un code d’erreur API
-    à un message utilisateur clair
-  */
   const getErrorMessage = (errorValue) => {
     const status =
-      typeof errorValue === 'number'
+      typeof errorValue === "number"
         ? errorValue
         : errorValue?.status;
 
@@ -43,9 +32,6 @@ const ReservationForm = ({
         return "Les informations fournies sont incorrectes";
       case 409:
         return "Ce créneau n'est plus disponible";
-      case 500:
-      case 503:
-        return "Une erreur est survenue, veuillez réessayer plus tard";
       default:
         return "Une erreur est survenue, veuillez réessayer plus tard";
     }
@@ -59,13 +45,23 @@ const ReservationForm = ({
     );
   }
 
+  const roomImage =
+    resourceImages[resource?.name] || "/images/default-room.png";
+
   return (
     <div className="reservation-form">
+
+      {/* TITRE EN HAUT */}
       <h3 className="reservation-form__title">
-        {isEdit
-          ? "Modifier la réservation"
-          : "Confirmer la réservation"}
+        {isEdit ? "Modifier la réservation" : "Confirmer la réservation"}
       </h3>
+
+      {/* IMAGE */}
+      <img
+        src={roomImage}
+        alt={resource?.name}
+        className="reservation-form__image"
+      />
 
       {isEdit && (
         <p className="reservation-form__info">
@@ -74,34 +70,28 @@ const ReservationForm = ({
         </p>
       )}
 
+      {/* RÉCAP */}
       <div className="reservation-form__summary">
         <div className="reservation-form__row">
-          <span className="reservation-form__label">Salle</span>
-          <span className="reservation-form__value">
-            {resource?.name}
-          </span>
+          <span>Salle</span>
+          <strong>{resource?.name}</strong>
         </div>
 
         <div className="reservation-form__row">
-          <span className="reservation-form__label">Date</span>
-          <span className="reservation-form__value">
-            {formatDate(selectedSlot.date)}
-          </span>
+          <span>Date</span>
+          <strong>{formatDate(selectedSlot.date)}</strong>
         </div>
 
         <div className="reservation-form__row">
-          <span className="reservation-form__label">Horaire</span>
-          <span className="reservation-form__value">
+          <span>Horaire</span>
+          <strong>
             {selectedSlot.startTime} – {selectedSlot.endTime}
-          </span>
+          </strong>
         </div>
       </div>
 
       {error && (
-        <ErrorMessage
-          message={getErrorMessage(error)}
-          type="error"
-        />
+        <ErrorMessage message={getErrorMessage(error)} type="error" />
       )}
 
       <button
@@ -112,8 +102,8 @@ const ReservationForm = ({
         {isSubmitting
           ? "Traitement en cours…"
           : isEdit
-            ? "Modifier la réservation"
-            : "Confirmer la réservation"}
+          ? "Modifier la réservation"
+          : "Confirmer la réservation"}
       </button>
     </div>
   );

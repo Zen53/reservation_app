@@ -1,51 +1,39 @@
 /* ===== Reservation Page ===== */
 .page--reservation {
-  max-width: 700px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
-  animation: pageEnter 0.4s ease-out;
+  padding: 2.5rem 1.5rem;
 }
 
-/* ===== Reservation Card ===== */
+/* ===== Card ===== */
 .reservation-card {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
   background: hsl(var(--card));
-  border: 1px solid hsl(var(--card-border));
-  padding: 2rem;
+  border: 1px solid hsl(var(--border));
   border-radius: var(--radius-lg);
+  padding: 2rem;
   box-shadow: var(--shadow-lg);
-  position: relative;
-  overflow: hidden;
 }
 
-/* Gradient accent */
-.reservation-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
-}
-
-.reservation-card h2 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.5rem;
+/* ===== Details ===== */
+.reservation-details h2 {
+  margin-bottom: 1.25rem;
+  font-size: 1.4rem;
   color: hsl(var(--text));
 }
 
-.reservation-card p {
-  margin: 0.75rem 0;
+.reservation-details p {
+  margin: 0.6rem 0;
   color: hsl(var(--text-secondary));
-  font-size: 1rem;
 }
 
-.reservation-card p strong {
+.reservation-details strong {
   color: hsl(var(--text));
-  font-weight: 600;
 }
 
-/* ===== Reservation Actions ===== */
+/* ===== Actions ===== */
 .reservation-actions {
   display: flex;
   gap: 1rem;
@@ -56,48 +44,49 @@
 
 .btn-modify {
   flex: 1;
-  padding: 0.875rem 1.5rem;
-  background: hsl(var(--card));
+  background: transparent;
   border: 2px solid hsl(var(--primary));
   color: hsl(var(--primary));
+  padding: 0.75rem;
   border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  transition: all var(--transition-fast);
 }
 
 .btn-modify:hover {
   background: hsl(var(--primary) / 0.1);
-  transform: translateY(-2px);
 }
 
 .btn-cancel {
   flex: 1;
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, hsl(var(--error)), hsl(0 84% 55%));
+  background: hsl(var(--error));
   color: white;
   border: none;
+  padding: 0.75rem;
   border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-cancel:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px hsl(var(--error) / 0.3);
 }
 
 .btn-cancel:disabled {
   background: hsl(var(--text-muted));
-  cursor: not-allowed;
-  transform: none;
+}
+
+/* ===== Image ===== */
+.reservation-image img {
+  width: 100%;
+  height: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .reservation-card {
+    grid-template-columns: 1fr;
+  }
+
   .reservation-actions {
     flex-direction: column;
   }

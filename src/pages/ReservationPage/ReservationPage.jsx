@@ -1,91 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   useParams,
   Link,
   useNavigate,
-  useSearchParams
-} from 'react-router-dom';
+  useSearchParams,
+} from "react-router-dom";
 
-import { getReservationById, deleteReservation } from '../../api';
+import { getReservationById, deleteReservation } from "../../api";
+import { resourceImages } from "../../utils/resourceImages";
 
-import Loader from '../../components/Loader/Loader';
-import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
+import Loader from "../../components/Loader/Loader";
+import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
 
-import './ReservationPage.css';
+import "./ReservationPage.css";
 
 const ReservationPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Paramètre de succès (?success=created|modified)
-  const success = searchParams.get('success');
+  const success = searchParams.get("success");
 
-  // Données réservation
   const [reservation, setReservation] = useState(null);
-
-  // États généraux
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // États annulation
   const [cancelLoading, setCancelLoading] = useState(false);
-  const [cancelSuccess, setCancelSuccess] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
     const fetchReservation = async () => {
       setLoading(true);
-      setError(null);
-
       const res = await getReservationById(id);
-      if (!mounted) return;
 
-      if (res.status === 404) {
-        setError('Réservation inexistante');
-      } else if (res.status !== 200) {
-        setError('Une erreur est survenue, veuillez réessayer plus tard');
-      } else {
-        setReservation(res.data);
-      }
+      if (res.status === 200) setReservation(res.data);
+      else setError("Impossible de charger la réservation");
 
       setLoading(false);
     };
 
     fetchReservation();
-    return () => {
-      mounted = false;
-    };
   }, [id]);
 
-  // Annulation
   const handleCancel = async () => {
     if (cancelLoading) return;
-
     setCancelLoading(true);
-    setError(null);
 
     const res = await deleteReservation(id);
-
     if (res.status === 204) {
-      setCancelSuccess(true);
-      setTimeout(() => {
-        navigate('/resources');
-      }, 1500);
+      navigate("/resources");
     } else {
-      setError("Impossible d’annuler la réservation.");
+      setError("Impossible d’annuler la réservation");
     }
 
     setCancelLoading(false);
   };
 
-  // Modification
   const handleModify = () => {
     navigate(
       `/resources/${reservation.resourceId}?mode=edit&reservationId=${reservation.id}`
     );
   };
+
+  const roomImage =
+    resourceImages[reservation?.resourceName] ||
+    "/images/default-room.png";
 
   return (
     <div className="page page--reservation">
@@ -96,65 +73,55 @@ const ReservationPage = () => {
         </p>
       </header>
 
-      {/* Messages de succès */}
-      {success === 'created' && (
+      {success && (
         <p className="success-message">
-           Votre réservation a bien été créée.
+          {success === "created"
+            ? "Votre réservation a bien été créée."
+            : "Votre réservation a bien été modifiée."}
         </p>
       )}
 
-      {success === 'modified' && (
-        <p className="success-message">
-           Votre réservation a bien été modifiée.
-        </p>
-      )}
-
-      {cancelSuccess && (
-        <p className="success-message">
-           Votre réservation a bien été annulée.
-          <br />
-          Redirection en cours…
-        </p>
-      )}
-
-      {/* Chargement */}
       {loading && <Loader />}
+      {!loading && error && <ErrorMessage message={error} type="error" />}
 
-      {/* Erreur */}
-      {!loading && error && (
-        <ErrorMessage message={error} type="error" />
-      )}
-
-      {/* Détails */}
-      {!loading && !error && reservation && (
+      {!loading && reservation && (
         <div className="reservation-card">
-          <h2>Réservation #{reservation.id}</h2>
 
-          <p><strong>Ressource :</strong> {reservation.resourceName}</p>
-          <p><strong>Date :</strong> {reservation.date}</p>
-          <p>
-            <strong>Heure :</strong> {reservation.startTime} – {reservation.endTime}
-          </p>
-          <p>
-            <strong>Créée le :</strong>{' '}
-            {new Date(reservation.createdAt).toLocaleString('fr-FR')}
-          </p>
+          {/* TEXTE */}
+          <div className="reservation-details">
+            <h2>Réservation #{reservation.id}</h2>
 
-          <div className="reservation-actions">
-            <button
-              onClick={handleModify}
-              className="btn-modify"
-            >
-              Modifier la réservation
-            </button>
+            <p><strong>Ressource :</strong> {reservation.resourceName}</p>
+            <p><strong>Date :</strong> {reservation.date}</p>
+            <p>
+              <strong>Heure :</strong>{" "}
+              {reservation.startTime} – {reservation.endTime}
+            </p>
 
-            <button
-              onClick={handleCancel}
-              disabled={cancelLoading}
-              className="btn-cancel"
-            >
-              {cancelLoading ? 'Annulation…' : 'Annuler la réservation'}
-            </button>
+            <div className="reservation-actions">
+              <button
+                className="btn-modify"
+                onClick={handleModify}
+              >
+                Modifier la réservation
+              </button>
+
+              <button
+                className="btn-cancel"
+                onClick={handleCancel}
+                disabled={cancelLoading}
+              >
+                Annuler la réservation
+              </button>
+            </div>
+          </div>
+
+          {/* IMAGE */}
+          <div className="reservation-image">
+            <img
+              src={roomImage}
+              alt={reservation.resourceName}
+            />
           </div>
         </div>
       )}
