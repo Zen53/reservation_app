@@ -175,10 +175,10 @@ npm run dev
 
 # Renseigner les variables suivantes dans le .env du backend :
 
-RESEND_API_KEY 
-EMAIL_FROM
-ADMIN_EMAIL
-ENV=development ou production
+- RESEND_API_KEY
+- EMAIL_FROM
+- ADMIN_EMAIL
+- ENV=development ou production
 
 # Lancer le backend normalement
 
@@ -186,7 +186,7 @@ Créer / modifier / annuler une réservation depuis l’interface pour déclench
 
 # Rappels par email
 
-Des emails automatiques sont envoyés 24h (J-1) et 1h (H-1) avant chaque réservation.
-Les rappels sont gérés par une tâche planifiée côté backend.
-Les réservations créées via l’application déclenchent automatiquement les rappels.
-Pour tester, il suffit de créer une réservation proche et de lancer le script de rappels.
+- Des emails automatiques sont envoyés 24h (J-1) et 1h (H-1) avant chaque réservation.
+- Les rappels sont gérés par une tâche planifiée côté backend.
+- Les réservations créées via l’application déclenchent automatiquement les rappels.
+- Pour tester, il suffit de créer une réservation proche et de lancer le script de rappels.
