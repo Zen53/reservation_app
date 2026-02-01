@@ -1,62 +1,100 @@
+/* ===== Availability List ===== */
 .availability-list {
-  margin-top: 1.5rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
 }
 
-/* ===== TITRE ===== */
+/* ===== Title ===== */
 .availability-list__title {
   font-size: 1.1rem;
-  color: #1e293b;
+  font-weight: 700;
+  color: hsl(var(--text));
   margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* ===== GROUPE PAR JOUR ===== */
+/* ===== Group Container ===== */
 .availability-list__group {
-  margin-bottom: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: #ffffff;
+  background: hsl(var(--card));
+  transition: all var(--transition-fast);
 }
 
-/* ===== EN-TÊTE JOUR (CLIQUABLE) ===== */
+.availability-list__group:hover {
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+/* ===== Date Header (Collapsible) ===== */
 .availability-list__date {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  padding: 0.75rem 1rem;
-  background-color: #f8fafc;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.06), hsl(var(--primary) / 0.02));
   border: none;
   cursor: pointer;
-
   font-size: 0.95rem;
-  font-weight: 500;
-  color: #0f172a;
+  font-weight: 600;
+  color: hsl(var(--text));
   text-align: left;
+  text-transform: capitalize;
+  transition: all var(--transition-fast);
 }
 
-.availability-list__date:hover {
-  background-color: #eef2ff;
+.availability-list__date:hover:not(:disabled) {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.04));
 }
 
 .availability-list__date:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Petit chevron */
+/* Chevron indicator */
 .availability-list__chevron {
-  font-size: 0.8rem;
-  color: #475569;
+  font-size: 0.85rem;
+  color: hsl(var(--primary));
+  transition: transform var(--transition-fast);
 }
 
-/* ===== CONTENEUR DES CRÉNEAUX ===== */
+.availability-list__group.open .availability-list__chevron {
+  transform: rotate(180deg);
+}
+
+/* ===== Slots Grid ===== */
 .availability-list__slots {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.75rem;
+  padding: 1rem;
+  background: hsl(var(--bg));
+  animation: slideDown 0.25s ease-out;
+}
 
-  padding: 0.75rem 1rem 1rem 1rem;
-  background-color: #ffffff;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Empty State ===== */
+.availability-list__empty {
+  text-align: center;
+  padding: 2rem;
+  color: hsl(var(--text-muted));
+  font-style: italic;
 }

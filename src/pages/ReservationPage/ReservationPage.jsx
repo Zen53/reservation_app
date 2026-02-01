@@ -99,19 +99,19 @@ const ReservationPage = () => {
       {/* Messages de succès */}
       {success === 'created' && (
         <p className="success-message">
-          ✅ Votre réservation a bien été créée.
+           Votre réservation a bien été créée.
         </p>
       )}
 
       {success === 'modified' && (
         <p className="success-message">
-          ✏️ Votre réservation a bien été modifiée.
+           Votre réservation a bien été modifiée.
         </p>
       )}
 
       {cancelSuccess && (
         <p className="success-message">
-          ❌ Votre réservation a bien été annulée.
+           Votre réservation a bien été annulée.
           <br />
           Redirection en cours…
         </p>

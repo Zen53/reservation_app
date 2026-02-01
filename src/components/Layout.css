@@ -1,20 +1,42 @@
+/* ======================================================
+   HEADER
+====================================================== */
+
 .layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  height: 72px;
-  border-bottom: 1px solid #ddd;
+
+  height: 80px;
+  padding: 0 1.75rem;
+
+  background: linear-gradient(
+    180deg,
+    hsl(var(--card) / 0.9),
+    hsl(var(--card) / 0.85)
+  );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-sm);
 }
 
-/* ===== Zones ===== */
+/* ======================================================
+   ZONES
+====================================================== */
 
 .layout-left,
 .layout-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  min-width: 33%;
+  gap: 0.75rem;
+  min-width: 220px;
 }
 
 .layout-left {
@@ -26,81 +48,151 @@
 }
 
 .layout-logo {
+  flex: 1;
   display: flex;
   justify-content: center;
-  flex: 1;
+  align-items: center;
 }
-
-/* ===== Logo ===== */
 
 .layout-logo img {
-  max-height: 130px;
-  width: auto;
+  height:180px;          
+  max-width: 220px;
   object-fit: contain;
+   margin-top: 20px; 
+
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-/* ===== Navigation ===== */
+.layout-logo img:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Dark mode : léger boost de visibilité */
+.dark .layout-logo img {
+  opacity: 1;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+/* ======================================================
+   NAVIGATION
+====================================================== */
+
+.layout-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 
 .layout-nav a {
-  position: relative;
-  color: #333;
+  padding: 0.55rem 0.9rem;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: hsl(var(--text-secondary));
   text-decoration: none;
-  font-weight: 500;
-  padding-bottom: 4px;
-  transition: color 0.2s ease;
+
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
 .layout-nav a:hover {
-  color: #3b82f6;
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
 }
 
 .layout-nav a.active {
-  color: #3b82f6;
-  font-weight: 600;
+  background: linear-gradient(
+    145deg,
+    hsl(var(--primary)),
+    hsl(var(--primary-hover))
+  );
+  color: hsl(var(--primary-foreground));
+  box-shadow: var(--shadow-sm);
 }
 
-/* ===== User info ===== */
+/* ======================================================
+   USER INFO
+====================================================== */
 
 .user-info {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-md);
+
+  background: hsl(var(--primary) / 0.1);
+  border: 1px solid hsl(var(--primary) / 0.25);
+
   font-size: 0.9rem;
-  color: #444;
+  font-weight: 600;
+  color: hsl(var(--text));
 }
 
-/* ===== Bouton Déconnexion ===== */
+/* ======================================================
+   LOGOUT
+====================================================== */
 
 .logout-button {
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
-  background-color: #ffffff;
-  color: #333;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-md);
+
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: hsl(var(--text-secondary));
+
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .logout-button:hover {
-  background-color: #f2f2f2;
+  background: hsl(var(--error) / 0.1);
+  border-color: hsl(var(--error));
+  color: hsl(var(--error));
 }
+
+/* ======================================================
+   MAIN
+====================================================== */
 
 main {
-  position: relative;
-  min-height: calc(100vh - 72px); /* hauteur écran - header */
-  background-image: url("/background_reservation.png");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(
+    180deg,
+    hsl(var(--bg-gradient-start)),
+    hsl(var(--bg-gradient-end))
+  );
 }
 
-main::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: rgba(255, 255, 255, 0.75);
-  z-index: 0;
-}
+/* ======================================================
+   RESPONSIVE
+====================================================== */
 
-main > * {
-  position: relative;
-  z-index: 1;
+@media (max-width: 768px) {
+  .layout-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .layout-logo {
+    order: -1;
+    width: 100%;
+  }
+
+  .layout-logo img {
+    height: 36px;
+  }
+
+  .layout-left,
+  .layout-right {
+    min-width: auto;
+  }
+
+  .user-info {
+    display: none;
+  }
 }

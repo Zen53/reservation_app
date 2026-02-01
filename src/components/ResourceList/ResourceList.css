@@ -1,13 +1,36 @@
+/* ===== Resource List Grid ===== */
 .resource-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* Staggered animation for cards */
+.resource-list .resource-card:nth-child(1) { animation-delay: 0.05s; }
+.resource-list .resource-card:nth-child(2) { animation-delay: 0.1s; }
+.resource-list .resource-card:nth-child(3) { animation-delay: 0.15s; }
+.resource-list .resource-card:nth-child(4) { animation-delay: 0.2s; }
+.resource-list .resource-card:nth-child(5) { animation-delay: 0.25s; }
+.resource-list .resource-card:nth-child(6) { animation-delay: 0.3s; }
+.resource-list .resource-card:nth-child(7) { animation-delay: 0.35s; }
+.resource-list .resource-card:nth-child(8) { animation-delay: 0.4s; }
+
+/* ===== Empty State ===== */
 .resource-list--empty {
   text-align: center;
-  padding: 3rem;
-  color: #64748b;
-  background: #f8fafc;
-  border-radius: 12px;
+  padding: 4rem 2rem;
+  background: hsl(var(--card));
+  border: 2px dashed hsl(var(--border));
+  border-radius: var(--radius-lg);
+  color: hsl(var(--text-muted));
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .resource-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
