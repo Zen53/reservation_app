@@ -103,3 +103,12 @@ export const toggleResourceActive = (resourceId, active) =>
     method: "PATCH",
     body: JSON.stringify({ active }),
   });
+
+  /*
+  ----- COMPTE UTILISATEUR -----
+*/
+
+export const deleteMyAccount = (email) =>
+  request(`http://127.0.0.1:8000/auth/me?email=${email}`, {
+    method: "DELETE",
+  });

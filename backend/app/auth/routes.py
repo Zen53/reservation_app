@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from app.core.security import create_access_token
+from app.auth.dependencies import get_current_user
+from app.services.email_service import send_user_account_deleted_email
 import os
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -9,27 +11,21 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # =========================
 # CONFIGURATION
 # =========================
-# Le code admin est stocké dans le fichier .env
-# Il n’est jamais envoyé au frontend
 ADMIN_CODE = os.getenv("ADMIN_CODE")
 
 if not ADMIN_CODE:
-    raise RuntimeError(
-        "ADMIN_CODE manquant dans les variables d'environnement"
-    )
+    raise RuntimeError("ADMIN_CODE manquant dans les variables d'environnement")
 
 
 # =========================
 # SCHEMAS DE DONNÉES
 # =========================
-# Données attendues pour la connexion utilisateur
 class UserLogin(BaseModel):
     first_name: str
     last_name: str
     email: str
 
 
-# Données attendues pour la connexion administrateur
 class AdminLogin(BaseModel):
     first_name: str
     last_name: str
@@ -42,11 +38,6 @@ class AdminLogin(BaseModel):
 # =========================
 @router.post("/login/user")
 def login_user(payload: UserLogin):
-    """
-    Connexion d’un utilisateur classique.
-    On crée un token qui contient son identité et son rôle.
-    """
-
     token_payload = {
         "user_id": payload.email,
         "role": "user",
@@ -69,21 +60,12 @@ def login_user(payload: UserLogin):
 
 
 # =========================
-# CONNEXION ADMINISTRATEUR
+# CONNEXION ADMIN
 # =========================
 @router.post("/login/admin")
 def login_admin(payload: AdminLogin):
-    """
-    Connexion administrateur.
-    L’accès est protégé par un code secret côté backend.
-    """
-
-    # Vérification du code admin
     if payload.admin_code != ADMIN_CODE:
-        raise HTTPException(
-            status_code=403,
-            detail="Code admin invalide",
-        )
+        raise HTTPException(status_code=403, detail="Code admin invalide")
 
     token_payload = {
         "user_id": payload.email,
@@ -104,3 +86,25 @@ def login_admin(payload: AdminLogin):
             "role": "admin",
         },
     }
+
+
+# =========================
+# SUPPRESSION COMPTE USER
+# =========================
+@router.delete("/me")
+def delete_my_account(email: str):
+    """
+    Suppression du compte utilisateur.
+    Envoie un email de confirmation.
+    """
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Email requis")
+
+    send_user_account_deleted_email(
+        email=email,
+        first_name="",
+        last_name="",
+    )
+
+    return {"message": "Compte utilisateur supprimé avec succès"}

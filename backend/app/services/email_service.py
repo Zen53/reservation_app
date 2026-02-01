@@ -5,7 +5,6 @@ from pathlib import Path
 import resend
 from dotenv import load_dotenv
 
-# Charge le .env (important pour scripts et tests)
 load_dotenv()
 
 # ======================
@@ -17,7 +16,7 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ENV = os.getenv("ENV", "development")
 
 # ======================
-# Logs (robuste)
+# Logs
 # ======================
 LOG_DIR = Path("app/logs")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -39,15 +38,11 @@ if not RESEND_FROM_EMAIL:
 
 resend.api_key = RESEND_API_KEY
 
+
 # ======================
-# Service
+# Generic sender
 # ======================
 def send_email(to: str, subject: str, html: str) -> dict | None:
-    """
-    Envoie un email via Resend.
-    Retourne la réponse Resend ou None en cas d'échec.
-    """
-
     try:
         response = resend.Emails.send(
             {
@@ -58,9 +53,25 @@ def send_email(to: str, subject: str, html: str) -> dict | None:
             }
         )
 
-        logging.info(f"Email envoyé → {to} | {subject} | id={response.get('id')}")
+        logging.info(f"Email envoyé → {to} | {subject}")
         return response
 
     except Exception as e:
         logging.error(f"Erreur email → {to} | {subject} | {str(e)}")
         return None
+
+
+# ======================
+# USER – suppression compte
+# ======================
+def send_user_account_deleted_email(email: str, first_name: str, last_name: str):
+    template_path = Path("app/templates/emails/user_account_deleted.html")
+
+    html = template_path.read_text(encoding="utf-8")
+    html = html.replace("{{ first_name }}", first_name or "")
+    html = html.replace("{{ last_name }}", last_name or "")
+    html = html.replace("{{ email }}", email)
+
+    subject = "Confirmation de suppression de votre compte"
+
+    return send_email(email, subject, html)
