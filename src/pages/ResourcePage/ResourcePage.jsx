@@ -1,45 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import {
-  useParams,
-  Link,
-  useNavigate,
-  useSearchParams
-} from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   getResourceById,
   getResourceAvailabilities,
   createReservation,
   getReservationById,
-  deleteReservation
-} from '../../api';
+  deleteReservation,
+} from "../../api";
 
-import Loader from '../../components/Loader/Loader';
-import ErrorMessage from '../../components/ErrorMessage/ErrorMessage';
-import AvailabilityList from '../../components/AvailabilityList/AvailabilityList';
-import ReservationForm from '../../components/ReservationForm/ReservationForm';
+import Loader from "../../components/Loader/Loader";
+import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
+import AvailabilityList from "../../components/AvailabilityList/AvailabilityList";
+import ReservationForm from "../../components/ReservationForm/ReservationForm";
 
-import './ResourcePage.css';
+import "./ResourcePage.css";
 
 const ResourcePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Détermination du mode (création ou modification)
-  const mode = searchParams.get('mode');
-  const reservationId = searchParams.get('reservationId');
-  const isEditMode = mode === 'edit' && reservationId;
+  const mode = searchParams.get("mode");
+  const reservationId = searchParams.get("reservationId");
+  const isEditMode = mode === "edit" && reservationId;
 
-  // Données principales
   const [resource, setResource] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
 
-  // États d’affichage
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // États liés à la réservation
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitErrorStatus, setSubmitErrorStatus] = useState(null);
@@ -51,52 +42,37 @@ const ResourcePage = () => {
       setLoading(true);
       setError(null);
 
-      // Chargement de la ressource
       const resResource = await getResourceById(id);
       if (!mounted) return;
 
-      if (resResource.status !== 200) {
+      if (resResource.status !== 200 || resResource.data.active === false) {
         setError("Impossible de charger la ressource");
-        setLoading(false);
-        return;
-      }
-
-      // Blocage si la ressource est désactivée
-      if (resResource.data.active === false) {
-        setError("Cette ressource est désactivée");
         setLoading(false);
         return;
       }
 
       setResource(resResource.data);
 
-      // Chargement des créneaux disponibles
       const resAvail = await getResourceAvailabilities(id);
       let slots = resAvail.status === 200 ? resAvail.data || [] : [];
 
-      // Cas particulier : modification d’une réservation existante
       if (isEditMode) {
         const resReservation = await getReservationById(reservationId);
-
         if (resReservation.status === 200) {
           const currentSlot = {
             date: resReservation.data.date,
             startTime: resReservation.data.startTime,
-            endTime: resReservation.data.endTime
+            endTime: resReservation.data.endTime,
           };
 
-          // Ajout du créneau actuel s’il n’est plus disponible
           const exists = slots.some(
-            s =>
+            (s) =>
               s.date === currentSlot.date &&
               s.startTime === currentSlot.startTime &&
               s.endTime === currentSlot.endTime
           );
 
-          if (!exists) {
-            slots = [currentSlot, ...slots];
-          }
-
+          if (!exists) slots.unshift(currentSlot);
           setSelectedSlot(currentSlot);
         }
       }
@@ -106,103 +82,89 @@ const ResourcePage = () => {
     };
 
     fetchData();
-    return () => {
-      mounted = false;
-    };
+    return () => (mounted = false);
   }, [id, isEditMode, reservationId]);
 
-  // Sélection d’un créneau
   const handleSelectSlot = (slot) => {
     setSelectedSlot(slot);
     setSubmitErrorStatus(null);
   };
 
-  // Validation de la réservation
-const handleSubmit = async () => {
-  if (!selectedSlot || isSubmitting) return;
+  const handleSubmit = async () => {
+    if (!selectedSlot || isSubmitting) return;
 
-  setIsSubmitting(true);
-  setSubmitErrorStatus(null);
+    setIsSubmitting(true);
+    setSubmitErrorStatus(null);
 
-  const payload = {
-    resourceId: parseInt(id, 10),
-    date: selectedSlot.date,
-    startTime: selectedSlot.startTime,
-    endTime: selectedSlot.endTime,
+    try {
+      const payload = {
+        resourceId: parseInt(id, 10),
+        date: selectedSlot.date,
+        startTime: selectedSlot.startTime,
+        endTime: selectedSlot.endTime,
+      };
+
+      if (isEditMode) {
+        payload.previousReservation = { id: reservationId };
+      }
+
+      const res = await createReservation(payload);
+      if (res.status !== 201) {
+        setSubmitErrorStatus(res.status);
+        return;
+      }
+
+      if (isEditMode) await deleteReservation(reservationId);
+
+      navigate(`/reservations/${res.data.id}?success=${isEditMode ? "modified" : "created"}`);
+    } catch {
+      setSubmitErrorStatus(500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  // ✏️ Cas modification
-  if (isEditMode) {
-    payload.previousReservation = {
-      id: reservationId,
-      date: selectedSlot.date,
-      startTime: selectedSlot.startTime,
-      endTime: selectedSlot.endTime,
-    };
-  }
-
-  try {
-    const resCreate = await createReservation(payload);
-
-    if (resCreate.status !== 201) {
-      setSubmitErrorStatus(resCreate.status);
-      return;
-    }
-
-    const newReservationId = resCreate.data.id;
-
-    if (isEditMode) {
-      await deleteReservation(reservationId);
-    }
-
-    navigate(`/reservations/${newReservationId}?success=${isEditMode ? "modified" : "created"}`);
-  } catch {
-    setSubmitErrorStatus(500);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
   return (
     <div className="page page--resource">
       <header className="page__header">
-        <h1>
-          {isEditMode ? "Modifier la réservation" : "Détails de la ressource"}
-        </h1>
+        <h1>Détails de la ressource</h1>
         <p className="page__subtitle">
           <Link to="/resources">← Retour à la liste des ressources</Link>
         </p>
       </header>
 
       {loading && <Loader />}
-
-      {!loading && error && (
-        <ErrorMessage message={error} type="error" />
-      )}
+      {!loading && error && <ErrorMessage message={error} type="error" />}
 
       {!loading && !error && resource && (
-        <div className="resource-wrapper">
-          <section className="resource-info">
-            <h2>{resource.name}</h2>
-            <p>{resource.description}</p>
-          </section>
+        <div className="resource-layout">
 
-          <aside className="resource-actions">
+          {/* COLONNE GAUCHE */}
+          <div className="resource-left">
+            <div className="resource-info">
+              <h2>{resource.name}</h2>
+              <p>{resource.description}</p>
+            </div>
+
             <AvailabilityList
               availabilities={availabilities}
               selectedSlot={selectedSlot}
               onSelectSlot={handleSelectSlot}
               disabled={isSubmitting}
             />
+          </div>
 
+          {/* COLONNE DROITE */}
+          <div className="resource-right">
             <ReservationForm
               resource={resource}
               selectedSlot={selectedSlot}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               error={submitErrorStatus}
+              isEdit={isEditMode}
             />
-          </aside>
+          </div>
         </div>
       )}
     </div>

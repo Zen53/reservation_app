@@ -5,7 +5,7 @@
   background: hsl(var(--card));
   border: 2px solid hsl(var(--border));
   border-radius: 18px;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   text-align: center;
   animation: fadeUp 0.6s ease forwards;
 }
@@ -19,11 +19,9 @@
     hsl(var(--text)),
     hsl(var(--primary))
   );
--webkit-background-clip: text;  
-background-clip: text;  /* webkit */
-color: transparent;
--webkit-text-fill-color: transparent;
-
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .login-subtitle {
@@ -32,7 +30,6 @@ color: transparent;
   font-size: 1.05rem;
 }
 
-/* Switch */
 .login-switch {
   display: flex;
   justify-content: center;
@@ -51,19 +48,14 @@ color: transparent;
   cursor: pointer;
   color: hsl(var(--text-secondary));
   border-radius: 12px;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .login-switch button.active {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)),
-    hsl(var(--accent))
-  );
+  background: hsl(var(--primary));
   color: white;
 }
 
-/* Form */
 .login-form {
   text-align: left;
 }
@@ -77,22 +69,33 @@ color: transparent;
 .form-group label {
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: hsl(var(--text));
 }
 
 .form-group input {
   padding: 0.85rem 1rem;
   border-radius: 12px;
   border: 2px solid hsl(var(--border));
-  background: hsl(var(--bg));
-  transition: border-color 0.2s ease;
+  background: hsl(var(--card));
+  color: hsl(var(--text));
+  font-size: 0.95rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: hsl(var(--text-muted));
 }
 
 .form-group input:focus {
   outline: none;
   border-color: hsl(var(--primary));
+  background: hsl(var(--card));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.25);
 }
 
-/* Submit */
 .login-submit {
   width: 100%;
   margin-top: 2rem;
@@ -102,31 +105,47 @@ color: transparent;
   font-size: 1.05rem;
   font-weight: 800;
   cursor: pointer;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)),
-    hsl(var(--accent))
-  );
+  background: hsl(var(--primary));
   color: white;
-  transition: transform 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .login-submit:hover:not(:disabled) {
   transform: translateY(-3px);
+  box-shadow: 0 10px 25px hsl(var(--primary) / 0.35);
 }
 
 .login-submit:disabled {
-  background: hsl(var(--text-secondary));
+  background: hsl(var(--text-muted));
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-/* Error */
 .login-error {
   margin-top: 1.25rem;
   padding: 1rem;
   border-radius: 12px;
-  background: #fee2e2;
-  color: #991b1b;
+  background: hsl(var(--error-bg));
+  color: hsl(var(--error));
   font-weight: 600;
   text-align: center;
+}
+.dark .login-page {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.dark .login-switch {
+  background: hsl(var(--bg));
+}
+
+.dark .form-group input {
+  background: hsl(var(--card));
+  color: hsl(var(--text));
+}
+
+.dark .form-group input::placeholder {
+  color: hsl(var(--text-muted));
 }

@@ -3,11 +3,6 @@ import "./AvailabilityList.css";
 import AvailabilitySlot from "../AvailabilitySlot/AvailabilitySlot";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-/*
-  Affiche les créneaux disponibles d’une ressource.
-  Les créneaux sont regroupés par jour
-  et affichés sous forme de liste déroulante.
-*/
 const AvailabilityList = ({
   availabilities,
   selectedSlot,
@@ -16,7 +11,6 @@ const AvailabilityList = ({
 }) => {
   const [openDate, setOpenDate] = useState(null);
 
-  // Aucun créneau disponible
   if (!availabilities || availabilities.length === 0) {
     return (
       <ErrorMessage
@@ -26,22 +20,18 @@ const AvailabilityList = ({
     );
   }
 
-  // Regroupement des créneaux par date
   const groupedByDate = availabilities.reduce((acc, slot) => {
-    if (!acc[slot.date]) {
-      acc[slot.date] = [];
-    }
+    acc[slot.date] = acc[slot.date] || [];
     acc[slot.date].push(slot);
     return acc;
   }, {});
 
-  // Ouvre ou ferme un jour
   const toggleDate = (date) => {
-    setOpenDate((prev) => (prev === date ? null : date));
+    setOpenDate(prev => (prev === date ? null : date));
   };
 
   return (
-    <div className="availability-list">
+    <section className="availability-list">
       <h3 className="availability-list__title">
         Créneaux disponibles
       </h3>
@@ -50,8 +40,10 @@ const AvailabilityList = ({
         const isOpen = openDate === date;
 
         return (
-          <div key={date} className="availability-list__group">
-            {/* Bouton pour afficher les créneaux du jour */}
+          <div
+            key={date}
+            className={`availability-list__group ${isOpen ? "open" : ""}`}
+          >
             <button
               type="button"
               className="availability-list__date"
@@ -62,7 +54,7 @@ const AvailabilityList = ({
                 {new Date(date).toLocaleDateString("fr-FR", {
                   weekday: "long",
                   day: "numeric",
-                  month: "long"
+                  month: "long",
                 })}
               </span>
 
@@ -71,7 +63,6 @@ const AvailabilityList = ({
               </span>
             </button>
 
-            {/* Créneaux affichés uniquement si le jour est ouvert */}
             {isOpen && (
               <div className="availability-list__slots">
                 {slots.map((slot, index) => (
@@ -91,7 +82,7 @@ const AvailabilityList = ({
           </div>
         );
       })}
-    </div>
+    </section>
   );
 };
 
