@@ -6,7 +6,6 @@ import {
   getResourceAvailabilities,
   createReservation,
   getReservationById,
-  deleteReservation,
 } from "../../api";
 
 import Loader from "../../components/Loader/Loader";
@@ -28,6 +27,8 @@ const ResourcePage = () => {
   const [resource, setResource] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
 
+  const [oldReservation, setOldReservation] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,6 +36,9 @@ const ResourcePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitErrorStatus, setSubmitErrorStatus] = useState(null);
 
+  // =========================
+  // CHARGEMENT DES DONNÉES
+  // =========================
   useEffect(() => {
     let mounted = true;
 
@@ -56,6 +60,7 @@ const ResourcePage = () => {
       const resAvail = await getResourceAvailabilities(id);
       let slots = resAvail.status === 200 ? resAvail.data || [] : [];
 
+      // MODE MODIFICATION
       if (isEditMode) {
         const resReservation = await getReservationById(reservationId);
         if (resReservation.status === 200) {
@@ -64,6 +69,8 @@ const ResourcePage = () => {
             startTime: resReservation.data.startTime,
             endTime: resReservation.data.endTime,
           };
+
+          setOldReservation(currentSlot);
 
           const exists = slots.some(
             (s) =>
@@ -85,11 +92,17 @@ const ResourcePage = () => {
     return () => (mounted = false);
   }, [id, isEditMode, reservationId]);
 
+  // =========================
+  // SÉLECTION CRÉNEAU
+  // =========================
   const handleSelectSlot = (slot) => {
     setSelectedSlot(slot);
     setSubmitErrorStatus(null);
   };
 
+  // =========================
+  // SOUMISSION
+  // =========================
   const handleSubmit = async () => {
     if (!selectedSlot || isSubmitting) return;
 
@@ -104,19 +117,27 @@ const ResourcePage = () => {
         endTime: selectedSlot.endTime,
       };
 
-      if (isEditMode) {
-        payload.previousReservation = { id: reservationId };
+      // ENVOI DE L’ANCIEN CRÉNEAU POUR MAIL DE MODIFICATION
+      if (isEditMode && oldReservation) {
+        payload.previousReservation = {
+          date: oldReservation.date,
+          startTime: oldReservation.startTime,
+          endTime: oldReservation.endTime,
+        };
       }
 
       const res = await createReservation(payload);
+
       if (res.status !== 201) {
         setSubmitErrorStatus(res.status);
         return;
       }
 
-      if (isEditMode) await deleteReservation(reservationId);
-
-      navigate(`/reservations/${res.data.id}?success=${isEditMode ? "modified" : "created"}`);
+      navigate(
+        `/reservations/${res.data.id}?success=${
+          isEditMode ? "modified" : "created"
+        }`
+      );
     } catch {
       setSubmitErrorStatus(500);
     } finally {
@@ -124,6 +145,9 @@ const ResourcePage = () => {
     }
   };
 
+  // =========================
+  // RENDER
+  // =========================
   return (
     <div className="page page--resource">
       <header className="page__header">
@@ -138,7 +162,6 @@ const ResourcePage = () => {
 
       {!loading && !error && resource && (
         <div className="resource-layout">
-
           {/* COLONNE GAUCHE */}
           <div className="resource-left">
             <div className="resource-info">

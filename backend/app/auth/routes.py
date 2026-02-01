@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+import os
+
 from app.core.security import create_access_token
 from app.auth.dependencies import get_current_user
 from app.services.email_service import send_user_account_deleted_email
-import os
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
 
 # =========================
 # CONFIGURATION
@@ -16,9 +16,8 @@ ADMIN_CODE = os.getenv("ADMIN_CODE")
 if not ADMIN_CODE:
     raise RuntimeError("ADMIN_CODE manquant dans les variables d'environnement")
 
-
 # =========================
-# SCHEMAS DE DONNÉES
+# SCHEMAS
 # =========================
 class UserLogin(BaseModel):
     first_name: str
@@ -89,22 +88,24 @@ def login_admin(payload: AdminLogin):
 
 
 # =========================
-# SUPPRESSION COMPTE USER
+# SUPPRESSION COMPTE UTILISATEUR
 # =========================
 @router.delete("/me")
-def delete_my_account(email: str):
+def delete_my_account(user=Depends(get_current_user)):
     """
-    Suppression du compte utilisateur.
+    Suppression du compte utilisateur connecté.
     Envoie un email de confirmation.
     """
 
-    if not email:
-        raise HTTPException(status_code=400, detail="Email requis")
+    email = user.get("email")
 
-    send_user_account_deleted_email(
-        email=email,
-        first_name="",
-        last_name="",
-    )
+    if not email:
+        raise HTTPException(status_code=400, detail="Email utilisateur introuvable")
+
+    # Email confirmation (NON BLOQUANT)
+    try:
+        send_user_account_deleted_email(email)
+    except Exception:
+        pass
 
     return {"message": "Compte utilisateur supprimé avec succès"}

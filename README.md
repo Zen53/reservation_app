@@ -175,7 +175,7 @@ npm run dev
 
 # Renseigner les variables suivantes dans le .env du backend :
 
-RESEND_API_KEY
+RESEND_API_KEY 
 EMAIL_FROM
 ADMIN_EMAIL
 ENV=development ou production

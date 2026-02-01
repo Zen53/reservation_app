@@ -1,30 +1,17 @@
 const API_URL = "http://127.0.0.1:8000";
 
-/*
-  Récupère le token stocké dans le navigateur
-  et l’ajoute dans le header Authorization si présent
-*/
+/* =========================
+   AUTH
+========================= */
 const getAuthHeaders = () => {
-  const token =
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token");
-
-  if (!token) {
-    return {};
-  }
-
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+  const token = localStorage.getItem("access_token");
+  if (!token) return {};
+  return { Authorization: `Bearer ${token}` };
 };
 
-/*
-  Fonction générique pour faire des appels API
-  Elle gère :
-  - les headers
-  - le JSON
-  - les erreurs simples
-*/
+/* =========================
+   REQUEST HELPER
+========================= */
 export const request = async (url, options = {}) => {
   const headers = {
     ...getAuthHeaders(),
@@ -33,15 +20,13 @@ export const request = async (url, options = {}) => {
   };
 
   try {
-    const res = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const res = await fetch(url, { ...options, headers });
 
-    const data =
-      res.status === 204
-        ? null
-        : await res.json().catch(() => null);
+    if (res.status === 204) {
+      return { status: 204, data: null, error: null };
+    }
+
+    const data = await res.json().catch(() => null);
 
     return {
       status: res.status,
@@ -57,10 +42,9 @@ export const request = async (url, options = {}) => {
   }
 };
 
-/*
-  ----- RESSOURCES -----
-*/
-
+/* =========================
+   RESSOURCES
+========================= */
 export const getResources = () =>
   request(`${API_URL}/resources`);
 
@@ -73,12 +57,20 @@ export const getResourceAvailabilities = (id) =>
 export const getResourceReservations = (id) =>
   request(`${API_URL}/resources/${id}/reservations`);
 
-/*
-  ----- RÉSERVATIONS UTILISATEUR -----
-*/
+export const toggleResourceActive = (resourceId, active) =>
+  request(`${API_URL}/resources/${resourceId}/active`, {
+    method: "PATCH",
+    body: JSON.stringify({ active }),
+  });
 
+/* =========================
+   RÉSERVATIONS
+========================= */
 export const getReservations = () =>
   request(`${API_URL}/reservations`);
+
+export const getReservationById = (id) =>
+  request(`${API_URL}/reservations/${id}`);
 
 export const createReservation = (payload) =>
   request(`${API_URL}/reservations`, {
@@ -86,29 +78,15 @@ export const createReservation = (payload) =>
     body: JSON.stringify(payload),
   });
 
-export const getReservationById = (id) =>
-  request(`${API_URL}/reservations/${id}`);
-
 export const deleteReservation = (id) =>
   request(`${API_URL}/reservations/${id}`, {
     method: "DELETE",
   });
 
-/*
-  ----- ADMIN -----
-*/
-
-export const toggleResourceActive = (resourceId, active) =>
-  request(`${API_URL}/resources/${resourceId}/active`, {
-    method: "PATCH",
-    body: JSON.stringify({ active }),
-  });
-
-  /*
-  ----- COMPTE UTILISATEUR -----
-*/
-
-export const deleteMyAccount = (email) =>
-  request(`http://127.0.0.1:8000/auth/me?email=${email}`, {
+/* =========================
+   COMPTE UTILISATEUR
+========================= */
+export const deleteMyAccount = () =>
+  request(`${API_URL}/auth/me`, {
     method: "DELETE",
   });

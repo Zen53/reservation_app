@@ -13,7 +13,6 @@ load_dotenv()
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-ENV = os.getenv("ENV", "development")
 
 # ======================
 # Logs
@@ -28,23 +27,23 @@ logging.basicConfig(
 )
 
 # ======================
-# Resend init
+# Resend init (SAFE)
 # ======================
-if not RESEND_API_KEY:
-    raise RuntimeError("RESEND_API_KEY manquant dans le .env")
-
-if not RESEND_FROM_EMAIL:
-    raise RuntimeError("RESEND_FROM_EMAIL manquant dans le .env")
-
-resend.api_key = RESEND_API_KEY
-
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+else:
+    logging.warning("RESEND_API_KEY manquant → emails désactivés")
 
 # ======================
-# Generic sender
+# Generic sender (NE BLOQUE JAMAIS)
 # ======================
-def send_email(to: str, subject: str, html: str) -> dict | None:
+def send_email(to: str, subject: str, html: str) -> None:
     try:
-        response = resend.Emails.send(
+        if not RESEND_API_KEY or not RESEND_FROM_EMAIL:
+            logging.warning("Email ignoré (config manquante)")
+            return
+
+        resend.Emails.send(
             {
                 "from": RESEND_FROM_EMAIL,
                 "to": to,
@@ -54,24 +53,63 @@ def send_email(to: str, subject: str, html: str) -> dict | None:
         )
 
         logging.info(f"Email envoyé → {to} | {subject}")
-        return response
 
     except Exception as e:
         logging.error(f"Erreur email → {to} | {subject} | {str(e)}")
-        return None
 
 
-# ======================
-# USER – suppression compte
-# ======================
-def send_user_account_deleted_email(email: str, first_name: str, last_name: str):
-    template_path = Path("app/templates/emails/user_account_deleted.html")
+# ==================================================
+# USER — suppression compte
+# ==================================================
+def send_user_account_deleted_email(email: str):
+    try:
+        template = Path("app/templates/emails/user_account_deleted.html")
+        html = template.read_text(encoding="utf-8")
 
-    html = template_path.read_text(encoding="utf-8")
-    html = html.replace("{{ first_name }}", first_name or "")
-    html = html.replace("{{ last_name }}", last_name or "")
-    html = html.replace("{{ email }}", email)
+        send_email(
+            to=email,
+            subject="Confirmation de suppression de votre compte",
+            html=html,
+        )
+    except Exception as e:
+        logging.error(f"Erreur mail suppression compte user : {e}")
 
-    subject = "Confirmation de suppression de votre compte"
 
-    return send_email(email, subject, html)
+# ==================================================
+# ADMIN — création réservation
+# ==================================================
+def send_admin_reservation_created_email(data: dict):
+    try:
+        template = Path("app/templates/emails/admin_new_reservation.html")
+        html = template.read_text(encoding="utf-8")
+
+        for key, value in data.items():
+            html = html.replace(f"{{{{ {key} }}}}", str(value))
+
+        send_email(
+            to=ADMIN_EMAIL,
+            subject="Nouvelle réservation créée",
+            html=html,
+        )
+    except Exception as e:
+        logging.error(f"Erreur mail admin création : {e}")
+
+
+# ==================================================
+# ADMIN — annulation réservation
+# ==================================================
+def send_admin_reservation_cancelled_email(data: dict):
+    try:
+        template = Path("app/templates/emails/admin_cancel_reservation.html")
+        html = template.read_text(encoding="utf-8")
+
+        for key, value in data.items():
+            html = html.replace(f"{{{{ {key} }}}}", str(value))
+
+        send_email(
+            to=ADMIN_EMAIL,
+            subject="Réservation annulée",
+            html=html,
+        )
+    except Exception as e:
+        logging.error(f"Erreur mail admin annulation : {e}")
