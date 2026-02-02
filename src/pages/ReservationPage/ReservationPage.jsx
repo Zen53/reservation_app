@@ -8,6 +8,7 @@ import {
 
 import { getReservationById, deleteReservation } from "../../api";
 import { resourceImages } from "../../utils/resourceImages";
+import { useAuth } from '@clerk/clerk-react';
 
 import Loader from "../../components/Loader/Loader";
 import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
@@ -18,6 +19,7 @@ const ReservationPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { getToken } = useAuth();
 
   const success = searchParams.get("success");
 
@@ -29,7 +31,10 @@ const ReservationPage = () => {
   useEffect(() => {
     const fetchReservation = async () => {
       setLoading(true);
-      const res = await getReservationById(id);
+      const token = await getToken(); 
+      const authHeaders = { Authorization: `Bearer ${token}` };
+      
+      const res = await getReservationById(id, authHeaders);
 
       if (res.status === 200) setReservation(res.data);
       else setError("Impossible de charger la réservation");
@@ -44,7 +49,11 @@ const ReservationPage = () => {
     if (cancelLoading) return;
     setCancelLoading(true);
 
-    const res = await deleteReservation(id);
+    const token = await getToken();
+    const authHeaders = { Authorization: `Bearer ${token}` };
+      
+    const res = await deleteReservation(id, authHeaders);
+    
     if (res.status === 204) {
       navigate("/resources");
     } else {

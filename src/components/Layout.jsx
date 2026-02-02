@@ -1,12 +1,19 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuth } from "../auth/useAuth";
+import {
+  SignedIn,
+  SignedOut,
+  useUser,
+  useAuth as useClerkAuth,
+} from "@clerk/clerk-react";
 import "./Layout.css";
 
 export default function Layout() {
-  const { isAuthenticated, user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { user } = useUser();
+  const { signOut, isLoaded } = useClerkAuth();
 
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -26,6 +33,9 @@ export default function Layout() {
     navigate("/");
   };
 
+  const role = user?.publicMetadata?.role || "user";
+  const isAdmin = role === "admin";
+
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -37,8 +47,7 @@ export default function Layout() {
             Accueil
           </Link>
 
-          {isAuthenticated && (
-            <>
+          <SignedIn>
               <Link
                 to="/resources"
                 className={isActive("/resources") ? "active" : ""}
@@ -53,32 +62,21 @@ export default function Layout() {
                 Mes réservations
               </Link>
 
+              {isAdmin && <Link to="/admin">Admin</Link>}
+              {/* Optionnel : page pour entrer le code admin */}
+              {!isAdmin && <Link to="/admin-code">Code admin</Link>}
+
               <Link
                 to="/profile"
                 className={isActive("/profile") ? "active" : ""}
               >
                 Profil
               </Link>
-            </>
-          )}
+          </SignedIn>
 
-          {isAuthenticated && user?.role === "admin" && (
-            <Link
-              to="/admin"
-              className={isActive("/admin") ? "active" : ""}
-            >
-              Admin
-            </Link>
-          )}
-
-          {!isAuthenticated && (
-            <Link
-              to="/login"
-              className={isActive("/login") ? "active" : ""}
-            >
-              Connexion
-            </Link>
-          )}
+          <SignedOut>
+            <Link to="/login">Connexion</Link>
+          </SignedOut>
         </nav>
 
         {/* ===== CENTER : Logo ===== */}
@@ -128,8 +126,7 @@ export default function Layout() {
             )}
           </button>
 
-          {isAuthenticated && (
-            <>
+          <SignedIn>
               <span className="user-info">
                 {user.first_name
                   ? `${user.first_name} ${user.last_name}`
@@ -142,8 +139,12 @@ export default function Layout() {
               >
                 Déconnexion
               </button>
-            </>
-          )}
+          </SignedIn>
+          <SignedOut>
+            <Link to="/signup" className="signup-button">
+              S'inscrire
+            </Link>
+          </SignedOut>
         </div>
       </header>
 

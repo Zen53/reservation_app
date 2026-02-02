@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import date, timedelta, datetime
 from app.core.supabase import supabase
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user_optional, get_current_admin
 
 router = APIRouter(prefix="/resources", tags=["resources"])
 
 @router.get("/")
-def get_resources(user=Depends(get_current_user)):
+def get_resources(user=Depends(get_current_user_optional)):
     # Récupération des ressources
     # Les utilisateurs voient seulement les ressources actives
     try:
@@ -24,7 +24,7 @@ def get_resources(user=Depends(get_current_user)):
         )
 
 @router.get("/{resource_id}")
-def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
+def get_resource_by_id(resource_id: int, user=Depends(get_current_user_optional)):
     # Récupère une ressource par son id
     res = (
         supabase
@@ -46,11 +46,12 @@ def get_resource_by_id(resource_id: int, user=Depends(get_current_user)):
 
     return resource
 
+#ADMIN uniquement
 @router.patch("/{resource_id}/active")
 def toggle_resource_active(
     resource_id: int,
     payload: dict,
-    user=Depends(get_current_user)
+    user=Depends(get_current_admin)
 ):
     # Route réservée aux administrateurs
     if user.get("role") != "admin":
@@ -86,7 +87,7 @@ def get_resource_rules(resource_id: int):
     )
 
 @router.get("/{resource_id}/availabilities")
-def get_resource_availabilities(resource_id: int, user=Depends(get_current_user)):
+def get_resource_availabilities(resource_id: int, user=Depends(get_current_user_optional)):
     # Génération des créneaux disponibles sur 7 jours
     resource = (
         supabase

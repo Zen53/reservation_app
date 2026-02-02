@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getResources } from '../../api';
+import { useAuth } from '@clerk/clerk-react';
 
 import ResourceList from '../../components/ResourceList/ResourceList';
 import Loader from '../../components/Loader/Loader';
@@ -12,6 +13,7 @@ const ResourceListPage = () => {
   // États de gestion du chargement et des erreurs
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getToken } = useAuth();
 
   // Chargement des ressources au montage du composant
   useEffect(() => {
@@ -21,7 +23,10 @@ const ResourceListPage = () => {
       setLoading(true);
       setError(null);
 
-      const res = await getResources();
+      const token = await getToken(); 
+      const authHeaders = { Authorization: `Bearer ${token}` };
+      
+      const res = await getResources(authHeaders);
 
       // Sécurité pour éviter un setState après démontage
       if (!mounted) return;
