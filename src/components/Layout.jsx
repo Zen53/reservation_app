@@ -26,8 +26,6 @@ export default function Layout() {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
-  if (isLoaded) return null;
-
   const handleLogout = () => {
     signOut();
     navigate("/");
