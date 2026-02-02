@@ -5,7 +5,6 @@ const API_URL = "http://127.0.0.1:8000";
 ========================= */
 export const request = async (url, options = {}, extraHeaders = {}) => {
   const headers = {
-    ...getAuthHeaders(),
     ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...(options.headers || {}),
     ...extraHeaders,
@@ -73,13 +72,6 @@ export const createReservation = (payload, extraHeaders = {}) =>
 export const deleteReservation = (id, extraHeaders = {}) =>
   request(`${API_URL}/reservations/${id}`, {
     method: "DELETE",
-  }, extraHeaders);
-
-// ADMIN
-export const toggleResourceActive = (resourceId, active, extraHeaders = {}) =>
-  request(`${API_URL}/resources/${resourceId}/active`, {
-    method: "PATCH",
-    body: JSON.stringify({ active }),
   }, extraHeaders);
 
 /* =========================

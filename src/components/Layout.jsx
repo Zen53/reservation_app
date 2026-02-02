@@ -26,10 +26,10 @@ export default function Layout() {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
-  if (loading) return null;
+  if (isLoaded) return null;
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate("/");
   };
 
@@ -128,10 +128,11 @@ export default function Layout() {
 
           <SignedIn>
               <span className="user-info">
-                {user.first_name
-                  ? `${user.first_name} ${user.last_name}`
-                  : user.email}
-              </span>
+              Connecté :{" "}
+              {user?.firstName && user?.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user?.primaryEmailAddress?.emailAddress}
+            </span>
 
               <button
                 onClick={handleLogout}

@@ -77,7 +77,7 @@ const HomePage = () => {
           <Link to="/resources" className="home-button">
             Voir les ressources
           </Link>
-      <SignedIn>
+      </SignedIn>
 
       </div>
     </div>
