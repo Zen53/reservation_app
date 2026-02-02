@@ -61,18 +61,27 @@ def send_email(to: str, subject: str, html: str) -> None:
 # ==================================================
 # USER — suppression compte
 # ==================================================
-def send_user_account_deleted_email(email: str):
+def send_user_account_deleted_email(
+    email: str,
+    first_name: str = "",
+    last_name: str = "",
+):
     try:
         template = Path("app/templates/emails/user_account_deleted.html")
         html = template.read_text(encoding="utf-8")
+
+        html = html.replace("{{ email }}", email)
+        html = html.replace("{{ first_name }}", first_name or "Utilisateur")
+        html = html.replace("{{ last_name }}", last_name or "")
 
         send_email(
             to=email,
             subject="Confirmation de suppression de votre compte",
             html=html,
         )
+
     except Exception as e:
-        logging.error(f"Erreur mail suppression compte user : {e}")
+        print("Erreur email suppression compte utilisateur :", e)
 
 
 # ==================================================
