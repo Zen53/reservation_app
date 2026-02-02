@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getReservations } from "../../api";
+import { useAuth } from "@clerk/clerk-react";
 
 import Loader from "../../components/Loader/Loader";
 import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
@@ -12,6 +13,7 @@ const MyReservationsPage = () => {
   // États classiques de chargement et d'erreur
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     let mounted = true; // évite les mises à jour après démontage du composant
@@ -20,8 +22,11 @@ const MyReservationsPage = () => {
       setLoading(true);
       setError(null);
 
+      const token = await getToken();  
+      const authHeaders = { Authorization: `Bearer ${token}` };
+      
       // Appel API pour récupérer les réservations de l'utilisateur connecté
-      const res = await getReservations();
+      const res = await getReservations(authHeaders);
       if (!mounted) return;
 
       // Cas non autorisé ou non connecté
