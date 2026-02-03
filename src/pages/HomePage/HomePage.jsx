@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 import "./HomePage.css";
 
@@ -13,7 +13,8 @@ const images = [
 ];
 
 const HomePage = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useUser();
+
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -39,48 +40,45 @@ const HomePage = () => {
       <div className="bg-overlay" />
 
       <div className="page page--home">
-        <div className="welcome-card fade-in">
+        <SignedOut>
+          <div className="welcome-card fade-in">
 
-          {!isAuthenticated && (
-            <>
-              <h1>Bienvenue</h1>
+            <h1>Bienvenue</h1>
 
-              <p className="welcome-text">
-                Cette application permet de réserver facilement des ressources
-                comme des salles ou des créneaux horaires.
-              </p>
+            <p className="welcome-text">
+              Cette application permet de réserver facilement des ressources
+              comme des salles ou des créneaux horaires.
+            </p>
 
-              <p className="welcome-subtext">
-                Vous devez être connecté pour accéder aux réservations.
-              </p>
+            <p className="welcome-subtext">
+              Vous devez être connecté pour accéder aux réservations.
+            </p>
 
-              <Link to="/login" className="home-button">
-                Se connecter
-              </Link>
-            </>
-          )}
+            <Link to="/login" className="home-button">
+              Se connecter
+            </Link>
+          </div>
+        </SignedOut>
 
-          {isAuthenticated && (
-            <>
-              <h1>
-                Bon retour{user?.first_name ? `, ${user.first_name}` : ""}
-              </h1>
+      <SignedIn>
 
-              <p className="welcome-text">
-                Vous êtes connecté à l’application de réservation.
-              </p>
+          <h1>
+            Bon retour{user?.first_name ? `, ${user.first_name}` : ""}
+          </h1>
 
-              <p className="welcome-subtext">
-                Vous pouvez maintenant consulter les ressources disponibles.
-              </p>
+          <p className="welcome-text">
+            Vous êtes connecté à l’application de réservation.
+          </p>
 
-              <Link to="/resources" className="home-button">
-                Voir les ressources
-              </Link>
-            </>
-          )}
+          <p className="welcome-subtext">
+            Vous pouvez maintenant consulter les ressources disponibles.
+          </p>
 
-        </div>
+          <Link to="/resources" className="home-button">
+            Voir les ressources
+          </Link>
+      </SignedIn>
+
       </div>
     </div>
   );

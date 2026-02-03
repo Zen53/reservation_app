@@ -1,15 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Header, Request, Depends
 from pydantic import BaseModel
 import os
-from datetime import datetime
-from app.core.supabase import supabase
-from app.core.security import create_access_token
+import requests
+import httpx
+from clerk_backend_api import Clerk
+from clerk_backend_api.security import authenticate_request
+from clerk_backend_api.security.types import AuthenticateRequestOptions
 from app.auth.dependencies import get_current_user
-from app.services.email_service import (
-    send_user_account_deleted_email,
-    send_email,
-)
-from app.services.template_service import render_template
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -17,10 +14,14 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # CONFIGURATION
 # =========================
 ADMIN_CODE = os.getenv("ADMIN_CODE")
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 if not ADMIN_CODE:
     raise RuntimeError("ADMIN_CODE manquant dans les variables d'environnement")
+
+if not CLERK_SECRET_KEY:
+    raise RuntimeError("CLERK_SECRET_KEY manquant dans les variables d'environnement")
 
 # =========================
 # SCHEMAS
@@ -35,6 +36,10 @@ class AdminLogin(BaseModel):
     first_name: str
     last_name: str
     email: str
+    admin_code: str
+
+
+class AdminCodePayload(BaseModel):
     admin_code: str
 
 
@@ -67,34 +72,76 @@ def login_user(payload: UserLogin):
 
 
 # =========================
-# CONNEXION ADMIN
+# ACTIVATION ADMIN via Clerk
 # =========================
-@router.post("/login/admin")
-def login_admin(payload: AdminLogin):
+@router.post("/activate-admin")
+async def activate_admin(payload: AdminCodePayload, request: Request):
+    """
+    Active le rôle admin pour l'utilisateur Clerk courant,
+    si le code admin est correct.
+    """
+
+    # Vérifier le code admin
     if payload.admin_code != ADMIN_CODE:
         raise HTTPException(status_code=403, detail="Code admin invalide")
 
-    token_payload = {
-        "user_id": payload.email,
-        "role": "admin",
-        "email": payload.email,
-        "first_name": payload.first_name,
-        "last_name": payload.last_name,
-    }
+    # Authentifier la requête avec Clerk (vérif token + payload)
+    sdk = Clerk(bearer_auth=CLERK_SECRET_KEY)
 
-    token = create_access_token(token_payload)
+    # On copie les headers de la requête FastAPI
+    headers = dict(request.headers)
+
+    httpx_request = httpx.Request(
+        method=request.method,
+        url=str(request.url),
+        headers=headers,
+    )
+
+    request_state = sdk.authenticate_request(
+        httpx_request,
+        AuthenticateRequestOptions(
+            authorized_parties=None  # tu peux mettre ['http://localhost:5173'] si tu veux restreindre
+        ),
+    )
+
+    if not getattr(request_state, "is_signed_in", False):
+        raise HTTPException(status_code=401, detail="Utilisateur non authentifié")
+
+    payload = getattr(request_state, "payload", None)
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=401, detail="Token Clerk invalide")
+
+    clerk_user_id = payload.get("sub")
+    if not clerk_user_id:
+        raise HTTPException(status_code=401, detail="Impossible de récupérer l'utilisateur Clerk")
+
+    if not clerk_user_id:
+        raise HTTPException(status_code=401, detail="Impossible de récupérer l'utilisateur Clerk")
+
+    # Mettre à jour le public_metadata.role = "admin" via l'API Clerk
+    response = requests.patch(
+        f"https://api.clerk.com/v1/users/{clerk_user_id}/metadata",
+        headers={
+            "Authorization": f"Bearer {CLERK_SECRET_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "public_metadata": {
+                "role": "admin",
+            }
+        },
+        timeout=10,
+    )
+
+    if response.status_code >= 400:
+        print("Clerk error:", response.status_code, response.text)
+        raise HTTPException(status_code=500, detail="Erreur Clerk lors de la mise à jour du rôle")
 
     return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": payload.email,
-            "first_name": payload.first_name,
-            "last_name": payload.last_name,
-            "email": payload.email,
-            "role": "admin",
-        },
+        "status": "ok",
+        "message": "Rôle admin activé avec succès",
     }
+
 
 
 # =========================

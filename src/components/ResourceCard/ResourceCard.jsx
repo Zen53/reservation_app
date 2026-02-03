@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import { useUser } from "@clerk/clerk-react";  
 import { resourceImages } from "../../utils/resourceImages";
 
 import "./ResourceCard.css";
@@ -9,9 +9,21 @@ import "./ResourceCard.css";
   Affiche une ressource sous forme de carte
 */
 const ResourceCard = ({ resource, onToggleActive }) => {
-  const { user } = useAuth();
+  const { user, isLoaded } = useUser();
 
-  const isAdmin = user?.role === "admin";
+  // Sécurité : attend le chargement de l'utilisateur
+  if (!isLoaded) {
+    return (
+      <div className="resource-card loading">
+        Chargement...
+      </div>
+    );
+  }
+
+  // Récupération du rôle depuis publicMetadata
+  const isAdmin = user?.publicMetadata?.role === "admin";
+
+  // Vérifie si la ressource est désactivée
   const isInactive = resource.active === false;
 
   const image =

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.supabase import supabase
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, get_current_admin  # ← Les 2 !
 from app.services.email_service import send_email
 from app.services.template_service import render_template
 import os
@@ -14,7 +14,7 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 # ==================================================
 
 @router.get("/admin/stats")
-def admin_stats(user=Depends(get_current_user)):
+def admin_stats(user=Depends(get_current_admin)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
@@ -28,7 +28,7 @@ def admin_stats(user=Depends(get_current_user)):
 
 
 @router.get("/admin/all")
-def admin_all_reservations(user=Depends(get_current_user)):
+def admin_all_reservations(user=Depends(get_current_admin)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
 
@@ -81,7 +81,7 @@ def create_reservation(payload: dict, user=Depends(get_current_user)):
     end_time = payload["endTime"]
     previous = payload.get("previousReservation")
 
-    user_id = user["user_id"]
+    user_id = user["id"]
     user_email = user["email"]
 
     # 🔒 Vérification des conflits
@@ -181,6 +181,7 @@ def create_reservation(payload: dict, user=Depends(get_current_user)):
 
 @router.get("/")
 def get_my_reservations(user=Depends(get_current_user)):
+    user_id= user["id"]
     data = (
         supabase.table("reservations")
         .select("""
@@ -192,7 +193,7 @@ def get_my_reservations(user=Depends(get_current_user)):
             created_at,
             resources ( name )
         """)
-        .eq("user_id", user["user_id"])
+        .eq("user_id", user_id)
         .order("created_at", desc=True)
         .execute()
         .data
@@ -226,7 +227,7 @@ def get_reservation_by_id(reservation_id: int, user=Depends(get_current_user)):
             resources ( name )
         """)
         .eq("id", reservation_id)
-        .eq("user_id", user["user_id"])
+        .eq("user_id", user["id"])
         .execute()
         .data
     )
@@ -259,7 +260,7 @@ def delete_reservation(reservation_id: int, user=Depends(get_current_user)):
             resources ( name )
         """)
         .eq("id", reservation_id)
-        .eq("user_id", user["user_id"])
+        .eq("user_id", user["id"])
         .execute()
         .data
     )

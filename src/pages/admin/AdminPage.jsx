@@ -1,5 +1,7 @@
 import "./AdminPage.css";
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+
 import {
   getResources,
   toggleResourceActive,
@@ -7,6 +9,8 @@ import {
 } from "../../api";
 
 export default function AdminPage() {
+  const { getToken } = useAuth();
+
   const [resources, setResources] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [stats, setStats] = useState({
@@ -20,14 +24,22 @@ export default function AdminPage() {
   useEffect(() => {
     async function loadAdminData() {
       try {
+        const token = await getToken();
+
+        const authHeaders = token
+          ? { Authorization: `Bearer ${token}` }
+          : {};
+
         // Récupération de la liste des ressources
-        const resourcesRes = await getResources();
+        const resourcesRes = await getResources(authHeaders);
         if (resourcesRes.status !== 200) throw new Error();
         setResources(resourcesRes.data);
 
         // Récupération des statistiques globales (admin uniquement)
         const statsRes = await request(
-          "http://127.0.0.1:8000/reservations/admin/stats"
+          "http://127.0.0.1:8000/reservations/admin/stats",
+          {},
+          authHeaders
         );
         if (statsRes.status === 200) {
           setStats(statsRes.data);
@@ -35,7 +47,9 @@ export default function AdminPage() {
 
         // Récupération de toutes les réservations de tous les utilisateurs
         const allRes = await request(
-          "http://127.0.0.1:8000/reservations/admin/all"
+          "http://127.0.0.1:8000/reservations/admin/all",
+          {},
+          authHeaders
         );
         if (allRes.status === 200) {
           setReservations(allRes.data);
@@ -48,22 +62,32 @@ export default function AdminPage() {
     }
 
     loadAdminData();
-  }, []);
+  }, [getToken]);
 
   // Activation / désactivation d’une ressource par l’admin
   const handleToggleActive = async (resource) => {
-    const newActive = !resource.active;
+    try {
+      const token = await getToken();
+      const authHeaders = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
 
-    const res = await toggleResourceActive(resource.id, newActive);
+      const newActive = !resource.active;
 
-    if (res.status === 200) {
-      setResources((prev) =>
-        prev.map((r) =>
-          r.id === resource.id ? { ...r, active: newActive } : r
-        )
-      );
-    } else {
-      alert("Impossible de modifier l’état de la ressource");
+      const res = await toggleResourceActive(resource.id, newActive,authHeaders);
+
+      if (res.status === 200) {
+        setResources((prev) =>
+          prev.map((r) =>
+            r.id === resource.id ? { ...r, active: newActive } : r
+          )
+        );
+      } else {
+        alert("Impossible de modifier l’état de la ressource");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la modification de la ressource");
     }
   };
 

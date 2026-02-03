@@ -6,8 +6,10 @@ import {
   getResourceAvailabilities,
   createReservation,
   getReservationById,
+  deleteReservation
 } from "../../api";
 
+import { useAuth } from '@clerk/clerk-react';
 import Loader from "../../components/Loader/Loader";
 import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
 import AvailabilityList from "../../components/AvailabilityList/AvailabilityList";
@@ -19,6 +21,7 @@ const ResourcePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { getToken } = useAuth();
 
   const mode = searchParams.get("mode");
   const reservationId = searchParams.get("reservationId");
@@ -46,7 +49,11 @@ const ResourcePage = () => {
       setLoading(true);
       setError(null);
 
-      const resResource = await getResourceById(id);
+      // Chargement de la ressource
+      const token = await getToken();  
+      const authHeaders = { Authorization: `Bearer ${token}` };
+
+      const resResource = await getResourceById(id, authHeaders);
       if (!mounted) return;
 
       if (resResource.status !== 200 || resResource.data.active === false) {
@@ -57,12 +64,14 @@ const ResourcePage = () => {
 
       setResource(resResource.data);
 
-      const resAvail = await getResourceAvailabilities(id);
+      // Chargement des créneaux disponibles
+
+      const resAvail = await getResourceAvailabilities(id, authHeaders);
       let slots = resAvail.status === 200 ? resAvail.data || [] : [];
 
       // MODE MODIFICATION
       if (isEditMode) {
-        const resReservation = await getReservationById(reservationId);
+        const resReservation = await getReservationById(reservationId, authHeaders);
         if (resReservation.status === 200) {
           const currentSlot = {
             date: resReservation.data.date,
@@ -106,6 +115,12 @@ const ResourcePage = () => {
   const handleSubmit = async () => {
     if (!selectedSlot || isSubmitting) return;
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitErrorStatus(null);
 

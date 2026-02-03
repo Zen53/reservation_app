@@ -1,0 +1,102 @@
+/* AdminCodePage.css */
+
+.page.page--home.page--admin-code,
+.page.page--admin-code {
+  min-height: calc(100vh - 80px); /* selon la hauteur de ton header */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  background: #f5f7fb;
+}
+
+/* On réutilise le même style que les autres cards d'accueil */
+.page--admin-code .welcome-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  text-align: left;
+}
+
+.page--admin-code .welcome-card h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+
+.page--admin-code .welcome-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+/* Formulaire */
+
+.page--admin-code .login-form {
+  margin-top: 0;
+}
+
+.page--admin-code .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.page--admin-code .form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.page--admin-code .form-group input[type="password"] {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.page--admin-code .form-group input[type="password"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+
+/* Bouton */
+
+.page--admin-code .login-submit {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s;
+}
+
+.page--admin-code .login-submit:hover {
+  opacity: 0.95;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.page--admin-code .login-submit:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Message d’erreur / statut */
+
+.page--admin-code .login-error {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #b91c1c;
+}

@@ -1,22 +1,13 @@
 const API_URL = "http://127.0.0.1:8000";
 
 /* =========================
-   AUTH
-========================= */
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("access_token");
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
-};
-
-/* =========================
    REQUEST HELPER
 ========================= */
-export const request = async (url, options = {}) => {
+export const request = async (url, options = {}, extraHeaders = {}) => {
   const headers = {
-    ...getAuthHeaders(),
     ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...(options.headers || {}),
+    ...extraHeaders,
   };
 
   try {
@@ -45,48 +36,48 @@ export const request = async (url, options = {}) => {
 /* =========================
    RESSOURCES
 ========================= */
-export const getResources = () =>
-  request(`${API_URL}/resources`);
+export const getResources = extraHeaders = {}) =>
+  request(`${API_URL}/resources`, {}, extraHeaders);
 
-export const getResourceById = (id) =>
-  request(`${API_URL}/resources/${id}`);
+export const getResourceById = (id, extraHeaders = {}) =>
+  request(`${API_URL}/resources/${id}`, {}, extraHeaders);
 
-export const getResourceAvailabilities = (id) =>
-  request(`${API_URL}/resources/${id}/availabilities`);
+export const getResourceAvailabilities = (id, extraHeaders = {}) =>
+  request(`${API_URL}/resources/${id}/availabilities`, {}, extraHeaders);
 
-export const getResourceReservations = (id) =>
-  request(`${API_URL}/resources/${id}/reservations`);
+export const getResourceReservations = (id, extraHeaders = {}) =>
+  request(`${API_URL}/resources/${id}/reservations`, {}, extraHeaders);
 
-export const toggleResourceActive = (resourceId, active) =>
+export const toggleResourceActive = (resourceId, active, extraHeaders = {}) =>
   request(`${API_URL}/resources/${resourceId}/active`, {
     method: "PATCH",
     body: JSON.stringify({ active }),
-  });
+  }, extraHeaders);
 
 /* =========================
    RÉSERVATIONS
 ========================= */
-export const getReservations = () =>
-  request(`${API_URL}/reservations`);
+export const getReservations = (extraHeaders = {}) =>
+  request(`${API_URL}/reservations`, {}, extraHeaders);
 
-export const getReservationById = (id) =>
-  request(`${API_URL}/reservations/${id}`);
+export const getReservationById = (id, extraHeaders = {}) =>
+  request(`${API_URL}/reservations/${id}`, {}, extraHeaders);
 
-export const createReservation = (payload) =>
+export const createReservation = (payload, extraHeaders = {}) =>
   request(`${API_URL}/reservations`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, extraHeaders);
 
-export const deleteReservation = (id) =>
+export const deleteReservation = (id, extraHeaders = {}) =>
   request(`${API_URL}/reservations/${id}`, {
     method: "DELETE",
-  });
+  }, extraHeaders);
 
 /* =========================
    COMPTE UTILISATEUR
 ========================= */
-export const deleteMyAccount = () =>
+export const deleteMyAccount = ( extraHeaders = {}) =>
   request(`${API_URL}/auth/me`, {
     method: "DELETE",
-  });
+  }, extraHeaders);
