@@ -102,10 +102,9 @@ Chaque route correspond à un besoin précis du frontend.
 ### Principe
 
 Lors de la connexion :
-- le backend génère un **token JWT**
-- ce token contient :
-  - l’identifiant utilisateur
-  - le rôle (user ou admin)
+- le backend génère une connexion a Clerk
+- Cela permet de gérer les roles par l'API CLerk
+- La gestion de token reste la meme qu'une utilisation classique sans Clerk
 
 Le frontend :
 - stocke le token dans le localStorage
