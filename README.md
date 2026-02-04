@@ -75,13 +75,18 @@ SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=  
 JWT_SECRET_KEY=  
 ADMIN_CODE=
-
+CLERK_SECRET_KEY=
 ---
 
 ### Frontend
 
 1. Se placer dans le dossier frontend
-2. Installer les dépendances
+2. Créer un fichier .env à la racine
+   
+CLERK_SECRET_KEY=
+
+---
+3. Installer les dépendances
 
 npm install
 
@@ -108,10 +113,10 @@ npm run dev
 
 ## Authentification
 
-- Le backend génère un token JWT lors de la connexion
-- Le token est stocké côté frontend (localStorage)
-- Chaque requête protégée utilise l’en-tête Authorization Bearer
-- Les routes sont protégées selon le rôle utilisateur ou administrateur
+- Clerk gère l'authentification, les tokens JWT et la gestion des rôles
+- Le token JWT généré par Clerk est stocké côté frontend (localStorage)
+- Chaque requête protégée utilise l'en-tête Authorization: Bearer <clerk-token>
+- Les routes sont protégées via les rôles Clerk (utilisateur ou administrateur)
 
 ---
 
