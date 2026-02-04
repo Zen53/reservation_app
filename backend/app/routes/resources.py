@@ -5,10 +5,9 @@ from app.auth.dependencies import get_current_user_optional, get_current_admin
 
 router = APIRouter(prefix="/resources", tags=["resources"])
 
+
 @router.get("/")
 def get_resources(user=Depends(get_current_user_optional)):
-    # Récupération des ressources
-    # Les utilisateurs voient seulement les ressources actives
     try:
         query = supabase.table("resources").select("*")
 
@@ -16,12 +15,13 @@ def get_resources(user=Depends(get_current_user_optional)):
             query = query.eq("active", True)
 
         return query.execute().data
-
-    except Exception:
+    except Exception as e:
+        print("Resources error:", e)
         raise HTTPException(
             status_code=500,
-            detail="Erreur lors de la récupération des ressources"
+            detail="Erreur lors de la récupération des ressources",
         )
+
 
 @router.get("/{resource_id}")
 def get_resource_by_id(resource_id: int, user=Depends(get_current_user_optional)):

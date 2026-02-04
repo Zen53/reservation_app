@@ -22,16 +22,16 @@
     }
 
     .header {
-      background-color: #1a1a1a;
+      background-color: #2c3e50;
       padding: 20px;
       text-align: center;
-      border-bottom: 3px solid #d4af37;
+      border-bottom: 3px solid #f39c12;
     }
 
     .header h1 {
-      color: #d4af37;
+      color: #ecf0f1;
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
       text-transform: uppercase;
     }
 
@@ -43,7 +43,7 @@
       background-color: #f9f9f9;
       padding: 15px;
       border-radius: 6px;
-      border-left: 4px solid #d4af37;
+      border-left: 4px solid #f39c12;
       margin: 20px 0;
     }
 
@@ -55,39 +55,29 @@
 
     .details li {
       margin-bottom: 10px;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .details li strong {
-      color: #1a1a1a;
+      color: #2c3e50;
     }
 
-    .btn-container {
-      text-align: center;
-      margin-top: 30px;
+    .old-value {
+      text-decoration: line-through;
+      color: #95a5a6;
+      margin-right: 8px;
     }
 
-    .btn {
-      display: inline-block;
-      background-color: #d4af37;
-      color: #1a1a1a;
-      padding: 12px 24px;
-      text-decoration: none;
-      border-radius: 4px;
+    .new-value {
+      color: #e67e22;
       font-weight: bold;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-
-    .btn:hover {
-      background-color: #b5952f;
     }
 
     .footer {
-      background-color: #1a1a1a;
+      background-color: #2c3e50;
       padding: 15px;
       text-align: center;
-      color: #888;
+      color: #bdc3c7;
       font-size: 12px;
     }
   </style>
@@ -96,26 +86,32 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Réservation Confirmée</h1>
+      <h1>Réservation Modifiée</h1>
     </div>
     <div class="content">
-      <p>Bonjour,</p>
-      <p>Votre réservation a été enregistrée avec succès. Voici les détails :</p>
+      <p>Une réservation a été modifiée par l'utilisateur.</p>
 
       <div class="details">
         <ul>
+          <li><strong>Utilisateur :</strong> {{ user }}</li>
           <li><strong>Ressource :</strong> {{ resource }}</li>
-          <li><strong>Date :</strong> {{ date }}</li>
-          <li><strong>Horaire :</strong> {{ time }}</li>
+          <li>
+            <strong>Date :</strong>
+            <span class="old-value">{{ old_date }}</span>
+            <span class="new-value">{{ new_date }}</span>
+          </li>
+          <li>
+            <strong>Horaire :</strong>
+            <span class="old-value">{{ old_time }}</span>
+            <span class="new-value">{{ new_time }}</span>
+          </li>
         </ul>
       </div>
 
-      <div class="btn-container">
-        <a href="{{ link }}" class="btn">Voir ma réservation</a>
-      </div>
+      <p>Connectez-vous à l'interface d'administration pour plus de détails.</p>
     </div>
     <div class="footer">
-      <p>&copy; 2026 Salle de Réservation. Tous droits réservés.</p>
+      <p>Ceci est un message automatique du système de réservation.</p>
     </div>
   </div>
 </body>

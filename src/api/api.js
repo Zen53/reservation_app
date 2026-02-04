@@ -3,11 +3,11 @@ const API_URL = "http://127.0.0.1:8000";
 /* =========================
    REQUEST HELPER
 ========================= */
-export const request = async (url, options = {}, extraHeaders = {}) => {
+export const request = async (url, options = {}, token = null) => {
   const headers = {
     ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...(options.headers || {}),
-    ...extraHeaders,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
   try {
@@ -36,48 +36,86 @@ export const request = async (url, options = {}, extraHeaders = {}) => {
 /* =========================
    RESSOURCES
 ========================= */
-export const getResources = extraHeaders = {}) =>
-  request(`${API_URL}/resources`, {}, extraHeaders);
+export const getResources = (token) =>
+  request(`${API_URL}/resources`, {}, token);
 
-export const getResourceById = (id, extraHeaders = {}) =>
-  request(`${API_URL}/resources/${id}`, {}, extraHeaders);
+export const getResourceById = (id, token) =>
+  request(`${API_URL}/resources/${id}`, {}, token);
 
-export const getResourceAvailabilities = (id, extraHeaders = {}) =>
-  request(`${API_URL}/resources/${id}/availabilities`, {}, extraHeaders);
+export const getResourceAvailabilities = (id, token) =>
+  request(`${API_URL}/resources/${id}/availabilities`, {}, token);
 
-export const getResourceReservations = (id, extraHeaders = {}) =>
-  request(`${API_URL}/resources/${id}/reservations`, {}, extraHeaders);
+export const getResourceReservations = (id, token) =>
+  request(`${API_URL}/resources/${id}/reservations`, {}, token);
 
-export const toggleResourceActive = (resourceId, active, extraHeaders = {}) =>
-  request(`${API_URL}/resources/${resourceId}/active`, {
-    method: "PATCH",
-    body: JSON.stringify({ active }),
-  }, extraHeaders);
+export const toggleResourceActive = (resourceId, active, token) =>
+  request(
+    `${API_URL}/resources/${resourceId}/active`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ active }),
+    },
+    token
+  );
+
+export const getAdminReservations = (token) =>
+  request(`${API_URL}/reservations/admin/all`, {}, token);
+
+export const deleteAdminReservation = (id, token) =>
+  request(
+    `${API_URL}/reservations/admin/${id}`,
+    {
+      method: "DELETE",
+    },
+    token
+  );
 
 /* =========================
    RÉSERVATIONS
 ========================= */
-export const getReservations = (extraHeaders = {}) =>
-  request(`${API_URL}/reservations`, {}, extraHeaders);
+export const getReservations = (token) =>
+  request(`${API_URL}/reservations`, {}, token);
 
-export const getReservationById = (id, extraHeaders = {}) =>
-  request(`${API_URL}/reservations/${id}`, {}, extraHeaders);
+export const getReservationById = (id, token) =>
+  request(`${API_URL}/reservations/${id}`, {}, token);
 
-export const createReservation = (payload, extraHeaders = {}) =>
-  request(`${API_URL}/reservations`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  }, extraHeaders);
+export const createReservation = (payload, token) =>
+  request(
+    `${API_URL}/reservations`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    token
+  );
 
-export const deleteReservation = (id, extraHeaders = {}) =>
-  request(`${API_URL}/reservations/${id}`, {
-    method: "DELETE",
-  }, extraHeaders);
+export const updateReservation = (id, payload, token) =>
+  request(
+    `${API_URL}/reservations/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    token
+  );
+
+export const deleteReservation = (id, token) =>
+  request(
+    `${API_URL}/reservations/${id}`,
+    {
+      method: "DELETE",
+    },
+    token
+  );
 
 /* =========================
    COMPTE UTILISATEUR
 ========================= */
-export const deleteMyAccount = ( extraHeaders = {}) =>
-  request(`${API_URL}/auth/me`, {
-    method: "DELETE",
-  }, extraHeaders);
+export const deleteMyAccount = (token) =>
+  request(
+    `${API_URL}/auth/me`,
+    {
+      method: "DELETE",
+    },
+    token
+  );

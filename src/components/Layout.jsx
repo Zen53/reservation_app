@@ -46,30 +46,30 @@ export default function Layout() {
           </Link>
 
           <SignedIn>
-              <Link
-                to="/resources"
-                className={isActive("/resources") ? "active" : ""}
-              >
-                Ressources
-              </Link>
+            <Link
+              to="/resources"
+              className={isActive("/resources") ? "active" : ""}
+            >
+              Ressources
+            </Link>
 
-              <Link
-                to="/my-reservations"
-                className={isActive("/my-reservations") ? "active" : ""}
-              >
-                Mes réservations
-              </Link>
+            <Link
+              to="/my-reservations"
+              className={isActive("/my-reservations") ? "active" : ""}
+            >
+              Mes réservations
+            </Link>
 
-              {isAdmin && <Link to="/admin">Admin</Link>}
-              {/* Optionnel : page pour entrer le code admin */}
-              {!isAdmin && <Link to="/admin-code">Code admin</Link>}
+            {isAdmin && <Link to="/admin">Admin</Link>}
+            {/* Optionnel : page pour entrer le code admin */}
+            {!isAdmin && <Link to="/admin-code">Code admin</Link>}
 
-              <Link
-                to="/profile"
-                className={isActive("/profile") ? "active" : ""}
-              >
-                Profil
-              </Link>
+            <Link
+              to="/profile"
+              className={isActive("/profile") ? "active" : ""}
+            >
+              Profil
+            </Link>
           </SignedIn>
 
           <SignedOut>
@@ -125,19 +125,19 @@ export default function Layout() {
           </button>
 
           <SignedIn>
-              <span className="user-info">
+            <span className="user-info">
               Connecté :{" "}
               {user?.firstName && user?.lastName
                 ? `${user.firstName} ${user.lastName}`
                 : user?.primaryEmailAddress?.emailAddress}
             </span>
 
-              <button
-                onClick={handleLogout}
-                className="logout-button"
-              >
-                Déconnexion
-              </button>
+            <button
+              onClick={handleLogout}
+              className="logout-button"
+            >
+              Déconnexion
+            </button>
           </SignedIn>
           <SignedOut>
             <Link to="/signup" className="signup-button">
@@ -149,7 +149,7 @@ export default function Layout() {
 
       {/* ===== Main content ===== */}
       <main>
-        <Outlet />
+        <Outlet context={{ isDark }} />
       </main>
     </>
   );

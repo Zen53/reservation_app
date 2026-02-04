@@ -47,7 +47,7 @@ const HomePage = () => {
 
             <p className="welcome-text">
               Cette application permet de réserver facilement des ressources
-              comme des salles ou des créneaux horaires.
+              comme des salles pour vos réunions aux créneaux horaires souhaités.
             </p>
 
             <p className="welcome-subtext">
@@ -60,24 +60,25 @@ const HomePage = () => {
           </div>
         </SignedOut>
 
-      <SignedIn>
+        <SignedIn>
+          <div className="welcome-card fade-in">
+            <h1>
+              Bon retour{user?.first_name ? `, ${user.first_name}` : ""}
+            </h1>
 
-          <h1>
-            Bon retour{user?.first_name ? `, ${user.first_name}` : ""}
-          </h1>
+            <p className="welcome-text">
+              Vous êtes connecté à l’application de réservation.
+            </p>
 
-          <p className="welcome-text">
-            Vous êtes connecté à l’application de réservation.
-          </p>
+            <p className="welcome-subtext">
+              Vous pouvez maintenant consulter les ressources disponibles.
+            </p>
 
-          <p className="welcome-subtext">
-            Vous pouvez maintenant consulter les ressources disponibles.
-          </p>
-
-          <Link to="/resources" className="home-button">
-            Voir les ressources
-          </Link>
-      </SignedIn>
+            <Link to="/resources" className="home-button">
+              Voir les ressources
+            </Link>
+          </div>
+        </SignedIn>
 
       </div>
     </div>

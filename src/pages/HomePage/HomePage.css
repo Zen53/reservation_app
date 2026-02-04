@@ -33,9 +33,11 @@
   z-index: 2;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 5rem 1.5rem;
+  padding: 2rem 1.5rem; /* Ajusté */
   display: flex;
   justify-content: center;
+  align-items: center; /* Centrage vertical */
+  min-height: 100vh; /* Prend toute la hauteur */
 }
 
 /* Carte centrale */

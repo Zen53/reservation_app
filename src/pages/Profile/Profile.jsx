@@ -1,13 +1,15 @@
 import "./Profile.css";
 import { useState, useEffect } from "react";
-import { useUser, useClerk } from "@clerk/clerk-react";
+import { useUser, useClerk, useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import { deleteMyAccount } from "../../api";
 
 export default function Profile() {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const { signOut, setActive } = useClerk();
   const navigate = useNavigate();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -19,7 +21,6 @@ export default function Profile() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState("");
 
-  // Charge les données utilisateur au montage
   useEffect(() => {
     if (isLoaded && user) {
       setFormData({
@@ -43,7 +44,6 @@ export default function Profile() {
     setSuccess("");
 
     try {
-      // Met à jour le profil via Clerk Frontend API
       await user.update({
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -55,13 +55,11 @@ export default function Profile() {
 
       setSuccess("Profil mis à jour avec succès !");
       setIsEditing(false);
-      
-      // Refresh les données
+
       await setActive({ session: user.appearances[0]?.sessions[0]?.id });
-      
+
     } catch (err) {
       console.error("Erreur mise à jour profil:", err);
-      // setError("Erreur lors de la mise à jour. Réessayez.");
     } finally {
       setLoading(false);
     }
@@ -72,13 +70,26 @@ export default function Profile() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      await user.delete();
+      const token = await getToken();
+
+      console.log("Tentative suppression backend...");
+      const res = await deleteMyAccount(token);
+      console.log("Réponse backend:", res);
+
+      if (res.status !== 200) {
+        throw new Error(`Erreur Backend (${res.status}): ${res.error?.detail || "Inconnue"}`);
+      }
+
       await signOut();
       navigate("/");
     } catch (err) {
-      console.error("Erreur suppression:", err);
-      setError("Erreur lors de la suppression du compte.");
+      console.error("Erreur suppression détaillée:", err);
+      setError(err.message || "Erreur lors de la suppression du compte.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,26 +98,27 @@ export default function Profile() {
   }
 
   return (
-    <div className="page">
-      <h1>Mon Profil</h1>
-
-      {error && (
-        <div className="alert alert-error">
-          <strong>Erreur :</strong> {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="alert alert-success">
-          <strong>Succès :</strong> {success}
-        </div>
-      )}
-
+    <div className="page--profile">
       <div className="profile-card">
+        <h1>Mon Profil</h1>
+
+        {error && (
+          <div className="alert alert-error">
+            <strong>Erreur :</strong> {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="alert alert-success">
+            <strong>Succès :</strong> {success}
+          </div>
+        )}
+
+
         <div className="profile-header">
-          <img 
-            src={user.imageUrl} 
-            alt="Avatar" 
+          <img
+            src={user.imageUrl}
+            alt="Avatar"
             className="profile-avatar"
           />
           <div>
@@ -114,21 +126,21 @@ export default function Profile() {
             <p className="profile-email">{user.primaryEmailAddress?.emailAddress}</p>
             <p className="profile-id">ID: {user.id}</p>
             <span className="badge badge-verified">
-              {user.primaryEmailAddress?.verification?.status === "verified" 
+              {user.primaryEmailAddress?.verification?.status === "verified"
                 ? "Email vérifié" : "Email non vérifié"}
             </span>
           </div>
         </div>
 
         <div className="profile-actions">
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => setIsEditing(!isEditing)}
             disabled={loading}
           >
             {isEditing ? "Annuler" : "Modifier le profil"}
           </button>
-          <button 
+          <button
             className="btn btn-danger"
             onClick={handleDeleteAccount}
             disabled={loading}
@@ -188,8 +200,8 @@ export default function Profile() {
             </div>
 
             <div className="form-actions">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary"
                 disabled={loading}
               >
