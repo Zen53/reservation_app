@@ -1,0 +1,98 @@
+/* Global Page Layout (replacing .page) */
+.page--reservations {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+    padding: 2rem 1rem;
+}
+
+/* Reservations Card */
+.reservations-card {
+    max-width: 900px;
+    /* Plus large pour le tableau */
+    width: 100%;
+    padding: 3rem;
+    background: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    animation: fadeUp 0.6s ease forwards;
+}
+
+.reservations-card h1 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: hsl(var(--foreground));
+    text-align: center;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+    font-weight: 600;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Links inside table */
+td a {
+    color: hsl(var(--primary));
+    font-weight: 500;
+    text-decoration: none;
+}
+
+td a:hover {
+    text-decoration: underline;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state h2 {
+    color: hsl(var(--foreground));
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: hsl(var(--muted-foreground));
+    margin-bottom: 2rem;
+}
+
+/* Buttons */
+.primary-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: hsl(var(--primary));
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px hsl(var(--primary) / 0.3);
+}

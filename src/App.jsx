@@ -1,22 +1,25 @@
+import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { SignedIn, SignedOut, RedirectToSignIn, useUser } from "@clerk/clerk-react";
 
 import Layout from "./components/Layout";
-import ProtectedRoute from "./components/routing/ProtectedRoute";
+import ProtectedRoute from "./components/routing/ProtectedRoute"; // keep if used, otherwise remove
+import Loader from "./components/Loader/Loader";
 
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
-import Unauthorized from "./pages/auth/Unauthorized";
-import NotFound from "./pages/auth/NotFound";
-import Profile from "./pages/Profile/Profile";
+// Lazy Loading des pages
+const Login = lazy(() => import("./pages/auth/Login"));
+const Signup = lazy(() => import("./pages/auth/Signup"));
+const Unauthorized = lazy(() => import("./pages/auth/Unauthorized"));
+const NotFound = lazy(() => import("./pages/auth/NotFound"));
+const Profile = lazy(() => import("./pages/Profile/Profile"));
 
-import HomePage from "./pages/HomePage";
-import ResourceListPage from "./pages/ResourceListPage";
-import ResourcePage from "./pages/ResourcePage";
-import ReservationPage from "./pages/ReservationPage";
-import MyReservationsPage from "./pages/MyReservationsPage";
-import AdminPage from "./pages/admin/AdminPage";
-import AdminCodePage from "./pages/admin/AdminCodePage";
+const HomePage = lazy(() => import("./pages/HomePage"));
+const ResourceListPage = lazy(() => import("./pages/ResourceListPage"));
+const ResourcePage = lazy(() => import("./pages/ResourcePage"));
+const ReservationPage = lazy(() => import("./pages/ReservationPage"));
+const MyReservationsPage = lazy(() => import("./pages/MyReservationsPage"));
+const AdminPage = lazy(() => import("./pages/admin/AdminPage"));
+const AdminCodePage = lazy(() => import("./pages/admin/AdminCodePage"));
 
 function ClerkProtected({ children }) {
   return (
@@ -43,84 +46,86 @@ function AdminProtected({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        {/* Accueil */}
-        <Route path="/" element={<HomePage />} />
+    <Suspense fallback={<Loader />}>
+      <Routes>
+        <Route element={<Layout />}>
+          {/* Accueil */}
+          <Route path="/" element={<HomePage />} />
 
-        {/* Auth */}
-        <Route path="/login/*" element={<Login />} />
-        <Route path="/signup/*" element={<Signup />} />
+          {/* Auth */}
+          <Route path="/login/*" element={<Login />} />
+          <Route path="/signup/*" element={<Signup />} />
 
-        <Route path="/profile" element={
-          <SignedIn>
-            <Profile />
-          </SignedIn>
-        } />
-        
-        {/* Page pour activer le rôle admin via codeAdmin */}
-        <Route
-          path="/admin-code"
-          element={
-            <ClerkProtected>
-              <AdminCodePage />
-            </ClerkProtected>
-          }
-        />
+          <Route path="/profile" element={
+            <SignedIn>
+              <Profile />
+            </SignedIn>
+          } />
 
-        {/* Liste des ressources */}
-        <Route
-          path="/resources"
-          element={
-            <ClerkProtected>
-              <ResourceListPage />
-            </ClerkProtected>
-          }
-        />
+          {/* Page pour activer le rôle admin via codeAdmin */}
+          <Route
+            path="/admin-code"
+            element={
+              <ClerkProtected>
+                <AdminCodePage />
+              </ClerkProtected>
+            }
+          />
 
-        {/* Détail ressource */}
-        <Route
-          path="/resources/:id"
-          element={
-            <ClerkProtected>
-              <ResourcePage />
-            </ClerkProtected>
-          }
-        />
+          {/* Liste des ressources */}
+          <Route
+            path="/resources"
+            element={
+              <ClerkProtected>
+                <ResourceListPage />
+              </ClerkProtected>
+            }
+          />
 
-        {/* Détail réservation */}
-        <Route
-          path="/reservations/:id"
-          element={
-            <ClerkProtected>
-              <ReservationPage />
-            </ClerkProtected>
-          }
-        />
+          {/* Détail ressource */}
+          <Route
+            path="/resources/:id"
+            element={
+              <ClerkProtected>
+                <ResourcePage />
+              </ClerkProtected>
+            }
+          />
 
-        {/* Historique utilisateur */}
-        <Route
-          path="/my-reservations"
-          element={
-            <ClerkProtected>
-              <MyReservationsPage />
-            </ClerkProtected>
-          }
-        />
+          {/* Détail réservation */}
+          <Route
+            path="/reservations/:id"
+            element={
+              <ClerkProtected>
+                <ReservationPage />
+              </ClerkProtected>
+            }
+          />
 
-        {/* Page admin réservée aux admins */}
-        <Route
-          path="/admin"
-          element={
-            <AdminProtected>
-              <AdminPage />
-            </AdminProtected>
-          }
-        />
+          {/* Historique utilisateur */}
+          <Route
+            path="/my-reservations"
+            element={
+              <ClerkProtected>
+                <MyReservationsPage />
+              </ClerkProtected>
+            }
+          />
 
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Route>
-    </Routes>
+          {/* Page admin réservée aux admins */}
+          <Route
+            path="/admin"
+            element={
+              <AdminProtected>
+                <AdminPage />
+              </AdminProtected>
+            }
+          />
+
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }

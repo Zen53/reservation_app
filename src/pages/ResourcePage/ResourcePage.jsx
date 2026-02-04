@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 import {
   getResourceById,
   getResourceAvailabilities,
   createReservation,
+  updateReservation,
   getReservationById,
   deleteReservation
 } from "../../api";
@@ -20,12 +21,17 @@ import "./ResourcePage.css";
 const ResourcePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { getToken } = useAuth();
 
-  const mode = searchParams.get("mode");
-  const reservationId = searchParams.get("reservationId");
-  const isEditMode = mode === "edit" && reservationId;
+  // On récupère le mode edit depuis l'état de la navigation (passé par ReservationPage)
+  // OU depuis les query params si on voulait supporter le lien direct (optionnel)
+  const stateMode = location.state?.editMode;
+  const stateReservationId = location.state?.reservationdata?.id;
+
+  const isEditMode = stateMode || (searchParams.get("mode") === "edit");
+  const reservationId = stateReservationId || searchParams.get("reservationId");
 
   const [resource, setResource] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
@@ -50,10 +56,10 @@ const ResourcePage = () => {
       setError(null);
 
       // Chargement de la ressource
-      const token = await getToken();  
+      const token = await getToken();
       const authHeaders = { Authorization: `Bearer ${token}` };
 
-      const resResource = await getResourceById(id, authHeaders);
+      const resResource = await getResourceById(id, token);
       if (!mounted) return;
 
       if (resResource.status !== 200 || resResource.data.active === false) {
@@ -66,12 +72,12 @@ const ResourcePage = () => {
 
       // Chargement des créneaux disponibles
 
-      const resAvail = await getResourceAvailabilities(id, authHeaders);
+      const resAvail = await getResourceAvailabilities(id, token);
       let slots = resAvail.status === 200 ? resAvail.data || [] : [];
 
       // MODE MODIFICATION
       if (isEditMode) {
-        const resReservation = await getReservationById(reservationId, authHeaders);
+        const resReservation = await getReservationById(reservationId, token);
         if (resReservation.status === 200) {
           const currentSlot = {
             date: resReservation.data.date,
@@ -115,12 +121,13 @@ const ResourcePage = () => {
   const handleSubmit = async () => {
     if (!selectedSlot || isSubmitting) return;
 
-    const token = localStorage.getItem("token");
+    const token = await getToken();
     if (!token) {
-      navigate("/login");
+      // Si pas de token, Clerk devrait gérer la redirection ou l'état, 
+      // mais on peut forcer une sécurité ici.
       return;
     }
-    
+
     setIsSubmitting(true);
     setSubmitErrorStatus(null);
 
@@ -133,25 +140,31 @@ const ResourcePage = () => {
       };
 
       // ENVOI DE L’ANCIEN CRÉNEAU POUR MAIL DE MODIFICATION
-      if (isEditMode && oldReservation) {
-        payload.previousReservation = {
-          date: oldReservation.date,
-          startTime: oldReservation.startTime,
-          endTime: oldReservation.endTime,
-        };
+      /*
+        Désormais géré par le PUT backend qui compare avec l'existant en base.
+        Plus besoin d'envoyer previousReservation dans le payload pour l'update.
+      */
+
+      let res;
+      if (isEditMode) {
+        // UPDATE
+        res = await updateReservation(reservationId, payload, token);
+      } else {
+        // CREATE
+        res = await createReservation(payload, token);
       }
 
-      const res = await createReservation(payload);
-
-      if (res.status !== 201) {
+      // 201 Created ou 200 OK (Update)
+      if (res.status !== 201 && res.status !== 200) {
         setSubmitErrorStatus(res.status);
         return;
       }
 
+      // ID retourné ou existant
+      const finalId = res.data?.id || reservationId;
+
       navigate(
-        `/reservations/${res.data.id}?success=${
-          isEditMode ? "modified" : "created"
-        }`
+        `/reservations/${finalId}?success=${isEditMode ? "modified" : "created"}`
       );
     } catch {
       setSubmitErrorStatus(500);

@@ -1,111 +1,110 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getReservations } from "../../api";
 import { useAuth } from "@clerk/clerk-react";
 
 import Loader from "../../components/Loader/Loader";
 import ErrorMessage from "../../components/ErrorMessage/ErrorMessage";
 
-const MyReservationsPage = () => {
-  // Liste des réservations de l'utilisateur
-  const [reservations, setReservations] = useState([]);
+import "./MyReservationsPage.css";
 
-  // États classiques de chargement et d'erreur
+const MyReservationsPage = () => {
+  const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const { getToken } = useAuth();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    let mounted = true; // évite les mises à jour après démontage du composant
+    let mounted = true;
 
     const fetchReservations = async () => {
       setLoading(true);
       setError(null);
 
-      const token = await getToken();  
-      const authHeaders = { Authorization: `Bearer ${token}` };
-      
-      // Appel API pour récupérer les réservations de l'utilisateur connecté
-      const res = await getReservations(authHeaders);
-      if (!mounted) return;
+      try {
+        const token = await getToken();
+        // Le backend attend un string, pas un objet ! (Correctif appliqué précédemment ailleurs)
+        const res = await getReservations(token);
 
-      // Cas non autorisé ou non connecté
-      if (res.status === 401 || res.status === 403) {
-        setError("Vous devez être connecté pour voir vos réservations.");
-      }
-      // Autre erreur API
-      else if (res.status !== 200) {
-        setError("Impossible de charger vos réservations.");
-      }
-      // Succès : on stocke les réservations
-      else {
-        setReservations(Array.isArray(res.data) ? res.data : []);
-      }
+        if (!mounted) return;
 
-      setLoading(false);
+        if (res.status === 401 || res.status === 403) {
+          setError("Vous devez être connecté pour voir vos réservations.");
+        } else if (res.status !== 200) {
+          setError("Impossible de charger vos réservations.");
+        } else {
+          setReservations(Array.isArray(res.data) ? res.data : []);
+        }
+      } catch {
+        setError("Erreur lors du chargement des réservations.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
 
     fetchReservations();
 
-    // Nettoyage à la destruction du composant
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [getToken]);
 
-  // Affichage pendant le chargement
-  if (loading) return <Loader />;
-
-  // Affichage d'une erreur si nécessaire
-  if (error) return <ErrorMessage message={error} type="error" />;
+  if (loading) return <div className="page--reservations"><Loader /></div>;
+  if (error) return <div className="page--reservations"><div className="reservations-card"><ErrorMessage message={error} type="error" /></div></div>;
 
   return (
-    <div className="page">
-      <h1>Mes réservations</h1>
+    <div className="page--reservations">
+      <div className="reservations-card">
+        <h1>Mes réservations</h1>
 
-      {/* Aucun résultat */}
-      {reservations.length === 0 ? (
-        <div className="empty-state">
-          <h2>Aucune réservation pour le moment</h2>
-          <p>
-            Vous n’avez encore effectué aucune réservation.
-            <br />
-            Consultez les ressources disponibles pour en créer une.
-          </p>
+        {searchParams.get("success") === "cancelled" && (
+          <div className="success-message" style={{ marginBottom: '1.5rem', textAlign: 'center', padding: '1rem', background: 'hsl(var(--primary) / 0.15)', color: 'hsl(var(--primary))', borderRadius: '8px', fontWeight: '600' }}>
+            Votre réservation a bien été annulée.
+          </div>
+        )}
 
-          <Link to="/resources" className="primary-button">
-            Voir les ressources
-          </Link>
-        </div>
-      ) : (
-        // Liste des réservations
-        <table>
-          <thead>
-            <tr>
-              <th>Ressource</th>
-              <th>Date</th>
-              <th>Heure</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservations.map((r) => (
-              <tr key={r.id}>
-                <td>{r.resourceName}</td>
-                <td>{r.date}</td>
-                <td>
-                  {r.startTime} – {r.endTime}
-                </td>
-                <td>
-                  <Link to={`/reservations/${r.id}`}>
-                    Voir le détail
-                  </Link>
-                </td>
+        {reservations.length === 0 ? (
+          <div className="empty-state">
+            <h2>Aucune réservation pour le moment</h2>
+            <p>
+              Vous n’avez encore effectué aucune réservation.
+              <br />
+              Consultez les ressources disponibles pour en créer une.
+            </p>
+
+            <Link to="/resources" className="primary-button">
+              Voir les ressources
+            </Link>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Ressource</th>
+                <th>Date</th>
+                <th>Heure</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {reservations.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.resourceName}</td>
+                  <td>{r.date}</td>
+                  <td>
+                    {r.startTime} – {r.endTime}
+                  </td>
+                  <td>
+                    <Link to={`/reservations/${r.id}`}>Voir le détail</Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };

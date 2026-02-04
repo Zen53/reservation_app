@@ -1,21 +1,100 @@
-<h2>Nouvelle réservation créée</h2>
+<!DOCTYPE html>
+<html lang="fr">
 
-  <p>Une nouvelle réservation vient d’être effectuée.</p>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
 
-  <ul>
-    <li><strong>Utilisateur :</strong> {{ user }}</li>
-    <li><strong>Ressource :</strong> {{ resource }}</li>
-    <li><strong>Date :</strong> {{ date }}</li>
-    <li><strong>Horaire :</strong> {{ time }}</li>
-  </ul>
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-  <p>
-    Connectez-vous à l’interface d’administration pour consulter les détails.
-  </p>
+    .header {
+      background-color: #2c3e50;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 3px solid #3498db;
+    }
 
-  <hr />
+    .header h1 {
+      color: #ecf0f1;
+      margin: 0;
+      font-size: 22px;
+      text-transform: uppercase;
+    }
 
-  <p>
-    Email automatique – Application de réservation
-  </p>
+    .content {
+      padding: 30px;
+    }
 
+    .details {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #3498db;
+      margin: 20px 0;
+    }
+
+    .details ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .details li {
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .details li strong {
+      color: #2c3e50;
+    }
+
+    .footer {
+      background-color: #2c3e50;
+      padding: 15px;
+      text-align: center;
+      color: #bdc3c7;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Nouvelle Réservation</h1>
+    </div>
+    <div class="content">
+      <p>Une nouvelle réservation vient d'être effectuée sur la plateforme.</p>
+
+      <div class="details">
+        <ul>
+          <li><strong>Utilisateur :</strong> {{ user }}</li>
+          <li><strong>Ressource :</strong> {{ resource }}</li>
+          <li><strong>Date :</strong> {{ date }}</li>
+          <li><strong>Horaire :</strong> {{ time }}</li>
+        </ul>
+      </div>
+
+      <p>Connectez-vous à l'interface d'administration pour plus de détails.</p>
+    </div>
+    <div class="footer">
+      <p>Ceci est un message automatique du système de réservation.</p>
+    </div>
+  </div>
+</body>
+
+</html>

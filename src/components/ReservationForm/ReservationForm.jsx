@@ -65,8 +65,7 @@ const ReservationForm = ({
 
       {isEdit && (
         <p className="reservation-form__info">
-          Cette action annulera la réservation actuelle
-          avant d’en créer une nouvelle.
+          Vous êtes sur le point de modifier votre réservation.
         </p>
       )}
 
@@ -102,8 +101,8 @@ const ReservationForm = ({
         {isSubmitting
           ? "Traitement en cours…"
           : isEdit
-          ? "Modifier la réservation"
-          : "Confirmer la réservation"}
+            ? "Modifier la réservation"
+            : "Confirmer la réservation"}
       </button>
     </div>
   );

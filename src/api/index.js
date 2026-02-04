@@ -18,9 +18,13 @@ export {
   // Fonctions liées aux réservations utilisateur
   getReservations,
   createReservation,
+  updateReservation,
   getReservationById,
   deleteReservation,
 
   // Fonction réservée à l’administrateur
   toggleResourceActive,
+  getAdminReservations,
+  deleteAdminReservation,
+  deleteMyAccount,
 } from "./api";

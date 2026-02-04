@@ -1,23 +1,124 @@
-<h2>Réservation modifiée</h2>
+<!DOCTYPE html>
+<html lang="fr">
 
-<p>Votre réservation a été mise à jour.</p>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
 
-<ul>
-  <li><strong>Ressource :</strong> {{ resource }}</li>
-</ul>
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-<hr />
+    .header {
+      background-color: #1a1a1a;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 3px solid #d4af37;
+    }
 
-<p><strong>Ancien créneau :</strong></p>
-<ul>
-  <li>Date : {{ old_date }}</li>
-  <li>Horaire : {{ old_time }}</li>
-</ul>
+    .header h1 {
+      color: #d4af37;
+      margin: 0;
+      font-size: 24px;
+      text-transform: uppercase;
+    }
 
-<p><strong>Nouveau créneau :</strong></p>
-<ul>
-  <li>Date : {{ new_date }}</li>
-  <li>Horaire : {{ new_time }}</li>
-</ul>
+    .content {
+      padding: 30px;
+    }
 
-<p>À bientôt </p>
+    .details {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #d4af37;
+      margin: 20px 0;
+    }
+
+    .details ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .details li {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .details li strong {
+      color: #1a1a1a;
+    }
+
+    .btn-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #d4af37;
+      color: #1a1a1a;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #b5952f;
+    }
+
+    .footer {
+      background-color: #1a1a1a;
+      padding: 15px;
+      text-align: center;
+      color: #888;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Réservation Modifiée</h1>
+    </div>
+    <div class="content">
+      <p>Bonjour,</p>
+      <p>Votre réservation a été mise à jour avec succès.</p>
+
+      <div class="details">
+        <p><strong>Nouveaux détails :</strong></p>
+        <ul>
+          <li><strong>Ressource :</strong> {{ resource }}</li>
+          <li><strong>Date :</strong> {{ date }}</li>
+          <li><strong>Horaire :</strong> {{ time }}</li>
+        </ul>
+      </div>
+
+      <div class="btn-container">
+        <a href="{{ link }}" class="btn">Voir ma réservation</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p>&copy; 2026 Salle de Réservation. Tous droits réservés.</p>
+    </div>
+  </div>
+</body>
+
+</html>

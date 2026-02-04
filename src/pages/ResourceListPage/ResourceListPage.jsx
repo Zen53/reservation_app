@@ -24,9 +24,8 @@ const ResourceListPage = () => {
       setError(null);
 
       const token = await getToken(); 
-      const authHeaders = { Authorization: `Bearer ${token}` };
       
-      const res = await getResources(authHeaders);
+      const res = await getResources(token);
 
       // Sécurité pour éviter un setState après démontage
       if (!mounted) return;

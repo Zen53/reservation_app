@@ -7,12 +7,13 @@ from clerk_backend_api import Clerk
 from clerk_backend_api.security import authenticate_request
 from clerk_backend_api.security.types import AuthenticateRequestOptions
 from app.auth.dependencies import get_current_user
+from datetime import datetime
+from app.core.supabase import supabase
+from app.services.email_service import send_email, send_user_account_deleted_email
+from app.services.template_service import render_template
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# =========================
-# CONFIGURATION
-# =========================
 ADMIN_CODE = os.getenv("ADMIN_CODE")
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
@@ -23,9 +24,7 @@ if not ADMIN_CODE:
 if not CLERK_SECRET_KEY:
     raise RuntimeError("CLERK_SECRET_KEY manquant dans les variables d'environnement")
 
-# =========================
-# SCHEMAS
-# =========================
+
 class UserLogin(BaseModel):
     first_name: str
     last_name: str
@@ -43,9 +42,6 @@ class AdminCodePayload(BaseModel):
     admin_code: str
 
 
-# =========================
-# CONNEXION UTILISATEUR
-# =========================
 @router.post("/login/user")
 def login_user(payload: UserLogin):
     token_payload = {
@@ -71,24 +67,13 @@ def login_user(payload: UserLogin):
     }
 
 
-# =========================
-# ACTIVATION ADMIN via Clerk
-# =========================
 @router.post("/activate-admin")
 async def activate_admin(payload: AdminCodePayload, request: Request):
-    """
-    Active le rôle admin pour l'utilisateur Clerk courant,
-    si le code admin est correct.
-    """
-
-    # Vérifier le code admin
     if payload.admin_code != ADMIN_CODE:
         raise HTTPException(status_code=403, detail="Code admin invalide")
 
-    # Authentifier la requête avec Clerk (vérif token + payload)
     sdk = Clerk(bearer_auth=CLERK_SECRET_KEY)
 
-    # On copie les headers de la requête FastAPI
     headers = dict(request.headers)
 
     httpx_request = httpx.Request(
@@ -100,7 +85,7 @@ async def activate_admin(payload: AdminCodePayload, request: Request):
     request_state = sdk.authenticate_request(
         httpx_request,
         AuthenticateRequestOptions(
-            authorized_parties=None  # tu peux mettre ['http://localhost:5173'] si tu veux restreindre
+            authorized_parties=None
         ),
     )
 
@@ -115,10 +100,6 @@ async def activate_admin(payload: AdminCodePayload, request: Request):
     if not clerk_user_id:
         raise HTTPException(status_code=401, detail="Impossible de récupérer l'utilisateur Clerk")
 
-    if not clerk_user_id:
-        raise HTTPException(status_code=401, detail="Impossible de récupérer l'utilisateur Clerk")
-
-    # Mettre à jour le public_metadata.role = "admin" via l'API Clerk
     response = requests.patch(
         f"https://api.clerk.com/v1/users/{clerk_user_id}/metadata",
         headers={
@@ -143,19 +124,56 @@ async def activate_admin(payload: AdminCodePayload, request: Request):
     }
 
 
+@router.post("/deactivate-admin")
+async def deactivate_admin(request: Request):
+    sdk = Clerk(bearer_auth=CLERK_SECRET_KEY)
+    headers = dict(request.headers)
+    httpx_request = httpx.Request(
+        method=request.method,
+        url=str(request.url),
+        headers=headers,
+    )
 
-# =========================
-# SUPPRESSION COMPTE UTILISATEUR
-# =========================
+    request_state = sdk.authenticate_request(
+        httpx_request,
+        AuthenticateRequestOptions(authorized_parties=None),
+    )
+
+    if not getattr(request_state, "is_signed_in", False):
+        raise HTTPException(status_code=401, detail="Utilisateur non authentifié")
+
+    payload = getattr(request_state, "payload", None)
+    clerk_user_id = payload.get("sub") if payload else None
+
+    if not clerk_user_id:
+        raise HTTPException(status_code=401, detail="Utilisateur Clerk introuvable")
+
+    response = requests.patch(
+        f"https://api.clerk.com/v1/users/{clerk_user_id}/metadata",
+        headers={
+            "Authorization": f"Bearer {CLERK_SECRET_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "public_metadata": {
+                "role": "user",
+            }
+        },
+        timeout=10,
+    )
+
+    if response.status_code >= 400:
+        print("Clerk error (deactivate):", response.status_code, response.text)
+        raise HTTPException(status_code=500, detail="Erreur Clerk lors de la désactivation")
+
+    return {
+        "status": "ok",
+        "message": "Mode administrateur désactivé. Vous êtes maintenant un utilisateur standard.",
+    }
+
+
 @router.delete("/me")
 def delete_my_account(user=Depends(get_current_user)):
-    """
-    Suppression du compte utilisateur connecté
-    - Annulation des réservations
-    - Email utilisateur (résilient)
-    - Notification admin
-    """
-
     email = user.get("email")
     first_name = user.get("first_name", "")
     last_name = user.get("last_name", "")
@@ -164,20 +182,14 @@ def delete_my_account(user=Depends(get_current_user)):
     if not email:
         raise HTTPException(status_code=400, detail="Email utilisateur introuvable")
 
-    # =========================
-    # ANNULATION DES RÉSERVATIONS UTILISATEUR
-    # =========================
     try:
         supabase.table("reservations") \
             .delete() \
-            .eq("user_id", user["user_id"]) \
+            .eq("user_id", user["id"]) \
             .execute()
     except Exception as e:
         print("Erreur suppression réservations utilisateur :", e)
 
-    # =========================
-    # EMAIL UTILISATEUR
-    # =========================
     try:
         send_user_account_deleted_email(
             email=email,
@@ -187,9 +199,6 @@ def delete_my_account(user=Depends(get_current_user)):
     except Exception as e:
         print("Erreur email utilisateur :", e)
 
-    # =========================
-    # EMAIL ADMIN
-    # =========================
     try:
         if ADMIN_EMAIL:
             html_admin = render_template(
@@ -211,6 +220,20 @@ def delete_my_account(user=Depends(get_current_user)):
             )
     except Exception as e:
         print("Erreur email admin :", e)
+
+    try:
+        res = requests.delete(
+            f"https://api.clerk.com/v1/users/{user['id']}",
+            headers={
+                "Authorization": f"Bearer {CLERK_SECRET_KEY}",
+                "Content-Type": "application/json",
+            },
+            timeout=10,
+        )
+        if res.status_code >= 400:
+            print(f"Erreur delete Clerk: {res.status_code} {res.text}")
+    except Exception as e:
+        print("Exception lors de la suppression Clerk :", e)
 
     return {"message": "Compte utilisateur supprimé avec succès"}
 
