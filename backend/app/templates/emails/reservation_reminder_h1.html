@@ -1,13 +1,106 @@
-<h2>Rappel de réservation – H-1</h2>
+<!DOCTYPE html>
+<html lang="fr">
 
-<p>Bonjour,</p>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
 
-<p>Votre réservation commence dans environ <strong>1 heure</strong>.</p>
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-<ul>
-  <li><strong>Ressource :</strong> {{ resource }}</li>
-  <li><strong>Date :</strong> {{ date }}</li>
-  <li><strong>Heure :</strong> {{ time }}</li>
-</ul>
+    .header {
+      background-color: #1a1a1a;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 3px solid #d4af37;
+    }
 
-<p>À très bientôt,<br />L’équipe Reservation App</p>
+    .header h1 {
+      color: #d4af37;
+      margin: 0;
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .details {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #d4af37;
+      margin: 20px 0;
+    }
+
+    .details ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .details li {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .details li strong {
+      color: #1a1a1a;
+    }
+
+    .footer {
+      background-color: #1a1a1a;
+      padding: 15px;
+      text-align: center;
+      color: #888;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Rappel de réservation</h1>
+    </div>
+
+    <div class="content">
+      <p>Bonjour,</p>
+
+      <p>
+        Votre réservation commence dans environ
+        <strong>1 heure</strong>.
+      </p>
+
+      <div class="details">
+        <ul>
+          <li><strong>Ressource :</strong> {{ resource }}</li>
+          <li><strong>Date :</strong> {{ date }}</li>
+          <li><strong>Heure :</strong> {{ time }}</li>
+        </ul>
+      </div>
+
+      <p>Nous vous attendons très bientôt.</p>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2026 Salle de Réservation. Tous droits réservés.</p>
+    </div>
+  </div>
+</body>
+
+</html>
