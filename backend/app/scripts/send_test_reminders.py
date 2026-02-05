@@ -1,23 +1,49 @@
 """
 Script de test pour les emails de rappel (J-1 et H-1)
 
-⚠️ Ce script est volontairement indépendant du temps réel.
-Il permet de tester les emails sans attendre une vraie échéance.
-
 Commande :
     python -m app.scripts.send_test_reminders
 """
 
+import os
+import logging
+import httpx
+import asyncio
+
 from app.core.supabase import supabase
 from app.services.email_service import send_email
 from app.services.template_service import render_template
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
+CLERK_BASE_URL = "https://api.clerk.dev/v1"
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
+
+
+async def fetch_user_email(user_id: str) -> str:
+    if not CLERK_SECRET_KEY:
+        logging.error("CLERK_SECRET_KEY manquant")
+        return ""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                f"{CLERK_BASE_URL}/users/{user_id}",
+                headers={"Authorization": f"Bearer {CLERK_SECRET_KEY}"}
+            )
+            if res.status_code == 200:
+                clerk_user = res.json()
+                primary_id = clerk_user.get("primary_email_address_id")
+                for e in clerk_user.get("email_addresses", []):
+                    if e["id"] == primary_id:
+                        return e["email_address"]
+    except Exception as e:
+        logging.error(f"Erreur récupération email Clerk : {e}")
+
+    return ""
+
 
 def send_test_reminders():
-    # 1️⃣ Récupérer UNE réservation (la plus récente)
     reservations = (
         supabase
         .table("reservations")
@@ -27,9 +53,7 @@ def send_test_reminders():
             start_time,
             end_time,
             user_id,
-            resources (
-                name
-            )
+            resources ( name )
         """)
         .order("created_at", desc=True)
         .limit(1)
@@ -43,38 +67,28 @@ def send_test_reminders():
 
     r = reservations[0]
 
-    resource_name = r["resources"]["name"]
-    user_email = r["user_id"]
+    user_email = asyncio.run(fetch_user_email(r["user_id"]))
+    if not user_email:
+        logging.error("Email utilisateur introuvable.")
+        return
 
     context = {
-        "resource": resource_name,
+        "resource": r["resources"]["name"],
         "date": r["date"],
-        "time": f"{r['start_time']} - {r['end_time']}",
+        "time": f"{r['start_time']} – {r['end_time']}",
     }
 
-    # 2️⃣ Email J-1
     send_email(
         to=user_email,
         subject="[TEST] Rappel J-1 – Votre réservation",
-        html=render_template(
-            "reservation_reminder_j1.html",
-            context
-        ),
+        html=render_template("reservation_reminder_j1.html", context),
     )
 
-    logging.info(f"[TEST] Email J-1 envoyé à {user_email}")
-
-    # 3️⃣ Email H-1
     send_email(
         to=user_email,
         subject="[TEST] Rappel H-1 – Votre réservation imminente",
-        html=render_template(
-            "reservation_reminder_h1.html",
-            context
-        ),
+        html=render_template("reservation_reminder_h1.html", context),
     )
-
-    logging.info(f"[TEST] Email H-1 envoyé à {user_email}")
 
 
 if __name__ == "__main__":
